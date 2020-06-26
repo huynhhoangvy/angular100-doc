@@ -35,3 +35,10 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 - ngModule - angular component
 - a component can be declared in only one module/place 
 
+## Day #3 - Data binding
+
+- interpolation: {{ data }}
+- property binding: [value]="data.value"
+- event binding: (click)="handleClick()"
+- 2 way binding: [(ngModel)]="data.value" // FormsModule needed
+- 

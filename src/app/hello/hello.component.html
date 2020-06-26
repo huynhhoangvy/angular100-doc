@@ -1,1 +1,7 @@
-<p>hello works!</p>
+<div>
+    <span>Hello {{ user.name }}: {{ user.age }}</span>
+</div>
+<div>
+    <button (click)="handleClick()">test</button>
+</div>
+<input type="text" [value]="user.name" />
