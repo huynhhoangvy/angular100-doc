@@ -41,4 +41,9 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 - property binding: [value]="data.value"
 - event binding: (click)="handleClick()"
 - 2 way binding: [(ngModel)]="data.value" // FormsModule needed
-- 
+
+## Day #4 - Structure directive - ngIf
+
+- if else: <div *ngIf="data === condition; else someTag" >
+- ng-template: <ng-template #someTag>
+            <ng-templage [ngIf]="data == condition"><div></div></ng-template>

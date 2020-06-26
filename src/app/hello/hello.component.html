@@ -1,7 +1,13 @@
-<div>
-    <span>Hello {{ user.name }}: {{ user.age }}</span>
+<div>Name: {{ user.name }}, age: {{ user.age }}</div>
+<div *ngIf="user.age >= 13; else noKid">
+	Not a teenager
 </div>
+<ng-template #noKid>
+    <div>
+        KIDDO
+    </div>
+</ng-template>
 <div>
-    <button (click)="handleClick()">test</button>
+	<button (click)="handleClick()">test</button>
 </div>
 <input type="text" [value]="user.name" />
