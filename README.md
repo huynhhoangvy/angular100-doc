@@ -68,6 +68,7 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
         </div>
     </div>
 ```
+
 ```
     <div *ngFor="”let" item of list”>
         <ng-container *ngIf="”somethingGoood”">
@@ -80,3 +81,11 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
         </ng-template>
     </div>
 ```
+
+## Day #6 - Attribute directive
+
+-   class binding: `<div [class.tab-active]="isTabActive">`, `[class]="clasExpr"` with classExpr is string, array string, object
+-   style binding: `<div [style.width]="'value'">`
+    with unit: `[style.property.unit]="expression"` with expression is `number | undefined | null`
+    `[style]="styleExpr"` with styleExpr is string, array string, object
+-   font-size & fontSize are both acceptable
