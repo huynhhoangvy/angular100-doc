@@ -1,2 +1,12 @@
 app component
 <app-hello></app-hello>
+<hr />
+<button (click)="currentProgress = currentProgress + 1">increase</button>
+<app-progress-bar></app-progress-bar>
+<br>
+<app-progress-bar
+	[progress]="currentProgress"
+	[backgroundColor]="'#9e9e9e'"
+	[progressColor]="'#2e8b57'"
+>
+</app-progress-bar>

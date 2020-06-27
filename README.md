@@ -89,3 +89,10 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
     with unit: `[style.property.unit]="expression"` with expression is `number | undefined | null`
     `[style]="styleExpr"` with styleExpr is string, array string, object
 -   font-size & fontSize are both acceptable
+
+## Day #7 - Component interaction
+
+-   ngOnInit: run after component is created, after constructor and input binding
+-   validate in ngOnChanges or setter/getter
+-   `<button (click)="currentProgress = currentProgress + 1">increase</button>`
+-   external name/alias is not recommended

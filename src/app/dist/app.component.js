@@ -11,6 +11,7 @@ var core_1 = require("@angular/core");
 var AppComponent = /** @class */ (function () {
     function AppComponent() {
         this.title = 'angular100-doc';
+        this.currentProgress = 'a';
     }
     AppComponent = __decorate([
         core_1.Component({
