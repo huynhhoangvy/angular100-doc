@@ -11,3 +11,6 @@
 	<button (click)="handleClick()">test</button>
 </div>
 <input type="text" [value]="user.name" />
+<div *ngFor="let author of authors; index as idx">
+    {{ idx }} - {{ author.firstName }} {{ author.lastName }} 
+</div>

@@ -30,20 +30,53 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 
 ## Day #2 - Explore app
 
-- <app-root> inside index.html
-- module
-- ngModule - angular component
-- a component can be declared in only one module/place 
+-   <app-root> inside index.html
+-   module
+-   ngModule - angular component
+-   a component can be declared in only one module/place
 
 ## Day #3 - Data binding
 
-- interpolation: {{ data }}
-- property binding: [value]="data.value"
-- event binding: (click)="handleClick()"
-- 2 way binding: [(ngModel)]="data.value" // FormsModule needed
+-   interpolation: `{{ data }}`
+-   property binding: `[value]="data.value"`
+-   event binding: `(click)="handleClick()"`
+-   2 way binding: `[(ngModel)]="data.value" // FormsModule needed`
 
 ## Day #4 - Structure directive - ngIf
 
-- if else: <div *ngIf="data === condition; else someTag" >
-- ng-template: <ng-template #someTag>
-            <ng-templage [ngIf]="data == condition"><div></div></ng-template>
+-   if else: `<div *ngIf="data === condition; else someTag" >`
+-   ng-template:
+
+```
+    <ng-template #someTag>
+    <ng-templage [ngIf]="data == condition">
+
+```
+
+## Day #5 - Structure directive - ngForOf
+
+-   `<div *ngFor="let author of authors; idx as index">`
+-   local variables: \$implicit: T; index; count; first; last; even; odd
+-   `<ng-template ngFor [ngForOf]="authors" let-author let-idx="index">`
+
+-   multiple structure directive:
+
+```
+    <div *ngFor="”let" item of list”>
+        <div *ngIf="”somethingGoood”">
+            More code
+        </div>
+    </div>
+```
+```
+    <div *ngFor="”let" item of list”>
+        <ng-container *ngIf="”somethingGoood”">
+            More code
+        </ng-container>
+    </div>
+    <div *ngFor="”let" item of list”>
+        <ng-template [ngIf]="”somethingGoood”">
+            More code
+        </ng-template>
+    </div>
+```
