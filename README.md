@@ -99,3 +99,10 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 -   dynamically component generating: manually call lifecycle → implement side effect in setter
 -   `<button (click)="currentProgress = currentProgress + 1">increase</button>`
 -   external name/alias is not recommended
+
+## Day #8 - Component interaction - parent listens to children event
+
+-   create: `@Output() delete = new EventEmitter<number>();`
+-   emit: `(click)="delete.emit(author.id):`
+-   implement handling method: `onDelete(id: number) { //somethimg }`
+-   binding: `(delete)="onDelete($event)`

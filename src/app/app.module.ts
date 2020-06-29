@@ -5,12 +5,16 @@ import { NgModule } from '@angular/core';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ProgressBarComponent } from './progress-bar/progress-bar.component';
+import { AuthorListComponent } from './author-list/author-list.component';
+import { AuthorDetailsComponent } from './author-details/author-details.component';
 
 @NgModule({
     declarations: [
         AppComponent,
         HelloComponent,
-        ProgressBarComponent
+        ProgressBarComponent,
+        AuthorListComponent,
+        AuthorDetailsComponent
     ],
     imports: [
         BrowserModule,
