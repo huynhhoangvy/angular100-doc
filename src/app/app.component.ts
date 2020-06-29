@@ -8,4 +8,5 @@ import { Component } from '@angular/core';
 export class AppComponent {
     title = 'angular100-doc';
     currentProgress = 'a';
+    isChecked = true;
 }

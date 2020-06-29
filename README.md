@@ -106,3 +106,12 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 -   emit: `(click)="delete.emit(author.id):`
 -   implement handling method: `onDelete(id: number) { //somethimg }`
 -   binding: `(delete)="onDelete($event)`
+
+## Day #9 - Custom 2 way binding
+
+-   2 way binding: `<input type="text" [(ngModel)]="name">` === `<input type="text" [ngModel]="name" (ngModelChange)="name = $event">`
+-   create input & output:
+
+```
+    @Input() checked: boolean;
+```
