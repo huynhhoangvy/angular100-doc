@@ -127,8 +127,157 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 <app-toggle #toggleComp></app-toggle>
 
 ```
+
 -   `static` grants access of component in ngOnInit; however, childComponent must not be in any structure directive
 -   `ViewChildren` subscribe changes will fail if a child is inside a structure directive; in that case, move method to ngAfterViewInit
 -   `ViewChildren` does not have `static`
 
 ## Day #11 - Typescript data type
+
+-   `interface` is used to define types for an object
+
+```
+interface User {
+    firstName: string;
+    lastName: string;
+    age: number;
+    job?: string; // optional property
+}
+```
+
+```
+type User = {
+    firstName: string;
+    lastName: string;
+    age: number;
+    job?: string;
+};
+```
+
+## Day #12 - Typescript advanced type
+
+-   `unknown` is recommended instead of `any`
+-   Union type
+    `function test () string | number {}`
+    `type StringOrNumber = string | number;`
+-   Insertion type
+
+```
+    function merge<T1, T2>(o1: T1, o2: T2): T1 & T2 {
+    return { ...o1, ...o2 };
+    }
+
+    merge({ foo: 'bar' }, { bar: 'foo' });
+```
+
+-   Conditional type `T extends U ? X : Y`
+-   Type alias
+
+```
+    @Component({
+    selector: 'flex-container',
+    template: `<ng-content></ng-content>`,
+    })
+    export class FlexComponent {
+    @Input() flexDirection: string = 'row';
+
+    @HostBinding('style.display') get display() {
+        return 'flex';
+    }
+
+    @HostBinding('style.flex-direction') get direction() {
+        return this.flexDirection;
+    }
+    }
+```
+
+-   Alternative:
+
+```
+    type FlexDirection = 'row' | 'column' | 'row-reverse' | 'column-reverse';
+
+    @Component({
+    selector: 'flex-container',
+    template: `<ng-content></ng-content>`
+    })
+    export class FlexComponent {
+    @Input() flexDirection: FlexDirection = 'row';
+
+    @HostBinding('style.display') get display() {...}
+
+    @HostBinding('style.flex-direction') get direction() {
+        return this.flexDirection;
+    }
+    }
+```
+
+```
+    <!-- app.component.html -->
+    <flex-container>
+    <button>Submit</button>
+    <button>Cancel</button>
+    </flex-container>
+
+    <flex-container flexDirection="column">
+    <input type="email" />
+    <input type="password" />
+    </flex-container>
+```
+
+-   Type alias + conditional type
+
+```
+    type ObjectDictionary<T> = { [key: string]: T };
+    type ArrayDictionary<T> = { [key: string]: T[] };
+    export type Dictionary<T> = T extends []
+    ? ArrayDictionary<T[number]>
+    : ObjectDictionary<T>;
+
+    type StringDictionary = Dictionary<string>; // {[key: string]: string}
+    type NumberArrayDictionary = Dictionary<number[]>; // {[key: string]: number[]}
+    type UserEntity = Dictionary<User>; // {[key: string]: User}
+```
+```
+// Exclude/Extract
+type Exclude<T, U> = T extends U ? never : T;
+type Extract<T, U> = T extends U ? T : never;
+
+// Exclude: Loại bỏ những types ở T nếu như những types này gán được cho U
+type SomeDiff = Exclude<'a' | 'b' | 'c', 'c' | 'd'>; // 'a' | 'b'. 'c' đã bị removed.
+
+// Extract: Loại bỏ những types ở T nếu như những types này KHÔNG gán được cho U
+type SomeFilter = Extract<'a' | 'b' | 'c', 'c' | 'd'>; // 'c'. 'a' và 'b' đã bị removed.
+
+// hoặc có thể dùng Exclude để tạo type alias NonNullable
+type NonNullable<T> = Exclude<T, null | undefined>; // loại bỏ null và undefined từ T
+
+type Readonly<T> = { readonly [P in keyof T]: T[P] }; // làm tất cả các props trong type thành readonly. Eg: Rất có lợi khi dùng cho Redux State.
+type Partial<T> = { [P in keyof T]?: T[P] }; // làm tất cả các props trong type thành optional. Eg: Rất có lợi cho việc type 1 tham số khi cần truyền vào 1 type nào đó mà ko bắt buộc.
+type Nullable<T> = { [P in keyof T]: T[P] | null }; // cái này tương tự như Partial, Partial sẽ trả về T[P] | undefined. Còn Nullable sẽ trả về T[P] | null
+
+type Pick<T, K extends keyof T> = { [P in K]: T[P] };
+type Record<K extends keyof any, T> = { [P in K]: T };
+
+// Pick: Pick từ trong T những type có key là K
+type Person = {
+  firstName: string;
+  lastName: string;
+  password: string;
+};
+
+type PersonWithNames = Pick<Person, 'firstName' | 'lastName'>; // {firstName: string, lastName: string}
+
+// Record: Gán type T cho lần lượt từng key P trong K
+type ThreeStringProps = Record<'prop1' | 'prop2' | 'prop3', string>;
+// { prop1: string, prop2: string, prop3: string }
+
+type ReturnType<T> = T extends (...args: any[]) => infer R ? R : any;
+
+// ReturnType: trả về type của giá trị mà function T trả về.
+type Result = ReturnType<() => string>; // string
+
+type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+
+// Omit: loại bỏ type có key là K trong T
+type PersonWithoutPassword = Omit<Person, 'password'>; // {firstName: string, lastName: string}
+```
