@@ -114,4 +114,21 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 
 ```
     @Input() checked: boolean;
+    @Output() checkedChange = new EventEmitter<boolean>(); // must have `change` suffix
+    [(checked)]="isChecked"
 ```
+
+## Day #10 - Template variable, ViewChild, ViewChildren
+
+-   template variable:
+
+```
+<button (click)="toggleComp.toggle()"></button>
+<app-toggle #toggleComp></app-toggle>
+
+```
+-   `static` grants access of component in ngOnInit; however, childComponent must not be in any structure directive
+-   viewChildren subscribe changes will fail if a child is inside a structure directive; in that case, move method to ngAfterViewInit
+-   `ViewChildren` does not have `static`
+
+## Day #11 - 
