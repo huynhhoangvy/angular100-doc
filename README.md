@@ -128,7 +128,7 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 
 ```
 -   `static` grants access of component in ngOnInit; however, childComponent must not be in any structure directive
--   viewChildren subscribe changes will fail if a child is inside a structure directive; in that case, move method to ngAfterViewInit
+-   `ViewChildren` subscribe changes will fail if a child is inside a structure directive; in that case, move method to ngAfterViewInit
 -   `ViewChildren` does not have `static`
 
-## Day #11 - 
+## Day #11 - Typescript data type
