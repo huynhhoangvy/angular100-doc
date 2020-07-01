@@ -237,3 +237,15 @@ type User = {
     type NumberArrayDictionary = Dictionary<number[]>; // {[key: string]: number[]}
     type UserEntity = Dictionary<User>; // {[key: string]: User}
 ```
+
+## Day #13 - Content projection
+
+-   `<ng-content></ng-content>` work the same as React's `{children}`
+-   multiple `ng-content` is not allowed (without selector)
+-   Tag selector: `<ng-content select="some-component-selector-or-html-tag"><ng-content>`
+-   CSS class selector: `<ng-content select=".some-class"></ng-content>`
+-   Attribute selector: `<ng-content select="[some-attr]"></ng-content>`
+-   Selectors combination: `<ng-content select="some-component-selector-or-html-tag[some-attr]"></ng-content>`
+-   Selector: the same as CSS selector `select="label, span, app-label"`
+-   ngProjectAs: `<span ngProjectAs="label">` `<ng-container ngProjectAs="label">`
+-   `ng-container` works the same as React `<>`
