@@ -14,7 +14,9 @@ export class AppComponent implements OnInit, AfterViewInit {
     questions = {
         question1: true,
         question2: false
-    }
+    };
+    counter = 1;
+    navs = ['Active', 'Link 1', 'Link 2'];
 
     @ViewChildren(ToggleComponent) toggleComps: QueryList<ToggleComponent>;
     @ViewChild('nameInput', { static: true, read: ElementRef }) nameInput: ElementRef<HTMLInputElement>;

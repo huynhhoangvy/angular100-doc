@@ -249,3 +249,35 @@ type User = {
 -   Selector: the same as CSS selector `select="label, span, app-label"`
 -   ngProjectAs: `<span ngProjectAs="label">` `<ng-container ngProjectAs="label">`
 -   `ng-container` works the same as React `<>`
+
+## Day #14 - `ng-template`, `ngTemplateOutlet` and `ng-container`
+
+-   `ng-template`: a template that render with some conditions
+-   `ng-container`: avoid unnecessary wrapper
+
+```
+<ng-container [ngTemplateOutlet]="counterTmpl"></ng-container> items.
+<ng-template #counterTmpl>
+	<span class="badge badge-primary">{{ counter }}</span> items
+</ng-template>
+```
+
+```
+<ng-container
+    *ngTemplateOutlet="linkTemplate; context: { $implicit: link }"
+    <!-- *ngTemplateOutlet="linkTemplate; context: { link: link }" -->
+>
+    <!-- <ng-container
+    [ngTemplateOutlet]="linkTemplate"
+    [ngTemplateOutletContext]="{ link: link }"
+> -->
+</ng-container>
+```
+```
+<ng-template #linkTemplate let-l>
+<!-- <ng-template #linkTemplate let-l="link"> -->
+	<h4>
+		{{l}}
+	</h4>
+</ng-template>
+```

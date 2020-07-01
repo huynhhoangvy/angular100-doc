@@ -1,6 +1,39 @@
 app component
-<app-hello></app-hello>
+<p>
+	some text
+</p>
+<div class="card mx-4">
+	<div class="card-header">
+		<br />
+		you have selected
+		<ng-container [ngTemplateOutlet]="counterTmpl"></ng-container>.
+	</div>
+	<div class="card-body">
+		There are
+		<ng-container [ngTemplateOutlet]="counterTmpl"></ng-container> items.
+		were selected.
+	</div>
+	<div class="card-footer">
+		You have selected
+		<ng-container [ngTemplateOutlet]="counterTmpl"></ng-container> items.
+	</div>
+</div>
+<ng-template #counterTmpl>
+	<span class="badge badge-primary">{{ counter }}</span> items
+</ng-template>
+
+<ng-template #linkTemplate let-l>
+<!-- <ng-template #linkTemplate let-l="link"> -->
+	<h4>
+		{{l}}
+	</h4>
+</ng-template>
+<app-tabs [navs]="navs" [linkTemplate]="linkTemplate"></app-tabs>
+
+<br />
+<br />
 <hr />
+<app-hello></app-hello>
 <button (click)="currentProgress = currentProgress + 1">increase</button>
 <app-progress-bar></app-progress-bar>
 <br />
@@ -31,6 +64,7 @@ app component
 <app-toggle [(checked)]="questions.question2">
 	<h3 class="header">Header 2</h3>
 	<span ngProjectAs="label" for="">Question 2</span>
-    <p>content 2</p>
-    <button>skip</button>
+	<p>content 2</p>
+	<button>skip</button>
 </app-toggle>
+<br />
