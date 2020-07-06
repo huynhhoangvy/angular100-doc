@@ -281,3 +281,7 @@ type User = {
 	</h4>
 </ng-template>
 ```
+
+## Day #15 - Dependency injection
+
+-   
