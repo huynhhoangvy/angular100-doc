@@ -2,6 +2,20 @@ app component
 <p>
 	some text
 </p>
+<app-tab-group [(activeIndex)]="currentIndex">
+	<app-tab-panel title="First tab">First tab content</app-tab-panel>
+	<app-tab-panel title="Second tab">Second tab content</app-tab-panel>
+	<app-tab-panel title="Third tab">Third tab content</app-tab-panel>
+	<app-tab-panel title="Fourth tab">Fourth tab content</app-tab-panel>
+</app-tab-group>
+<app-tab-bs-group [(activeIndex)]="currentIndex">
+	<app-tab-panel title="First tab">First tab content</app-tab-panel>
+	<app-tab-panel title="Second tab">Second tab content</app-tab-panel>
+	<app-tab-panel title="Third tab">Third tab content</app-tab-panel>
+	<app-tab-panel title="Fourth tab">Fourth tab content</app-tab-panel>
+</app-tab-bs-group>
+<br />
+<br />
 <div class="card mx-4">
 	<div class="card-header">
 		<br />
@@ -23,9 +37,9 @@ app component
 </ng-template>
 
 <ng-template #linkTemplate let-l>
-<!-- <ng-template #linkTemplate let-l="link"> -->
+	<!-- <ng-template #linkTemplate let-l="link"> -->
 	<h4>
-		{{l}}
+		{{ l }}
 	</h4>
 </ng-template>
 <app-tabs [navs]="navs" [linkTemplate]="linkTemplate"></app-tabs>
