@@ -273,6 +273,7 @@ type User = {
 > -->
 </ng-container>
 ```
+
 ```
 <ng-template #linkTemplate let-l>
 <!-- <ng-template #linkTemplate let-l="link"> -->
@@ -284,4 +285,28 @@ type User = {
 
 ## Day #15 - Dependency injection
 
--   
+- `@Injectable()`, `NgModule()`, `@Component()`
+
+```
+    @Injectable({
+      providedIn: "root",
+    })
+    export class CartService {
+      // properties and methods
+    }
+```
+
+```
+@Component({
+selector: "app-product",
+templateUrl: "./product.component.html",
+styleUrls: ["./product.component.css"],
+})
+export class ProductComponent implements OnInit {
+constructor(private cartService: CartService) {}
+
+ngOnInit() {
+console.log(this.cartService.calculateTotal());
+}
+}
+```
