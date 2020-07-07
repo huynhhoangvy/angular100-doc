@@ -123,6 +123,10 @@
           }
         }
       }
-    }},
-  "defaultProject": "angular100-doc"
+    }
+  },
+  "defaultProject": "angular100-doc",
+  "cli": {
+    "analytics": false
+  }
 }

@@ -13,26 +13,26 @@ import { ToggleComponent } from './toggle/toggle.component';
 import { TabsComponent } from './tabs/tabs.component';
 import { TabGroupComponent } from './tab/tab-group.component';
 import { TabBsGroupComponent } from './tab/tab-bs-group.component';
+import { CounterComponent } from './counter/counter.component';
+import { TabContentDirective } from './tab/tab-content.directive';
 
 @NgModule({
-    declarations: [
-        AppComponent,
-        HelloComponent,
-        ProgressBarComponent,
-        AuthorListComponent,
-        AuthorDetailsComponent,
-        ToggleComponent,
-        TabGroupComponent,
-        TabPanelComponent,
-        TabsComponent,
-        TabBsGroupComponent
-    ],
-    imports: [
-        BrowserModule,
-        AppRoutingModule,
-        FormsModule
-    ],
-    providers: [],
-    bootstrap: [AppComponent]
+  declarations: [
+    AppComponent,
+    HelloComponent,
+    ProgressBarComponent,
+    AuthorListComponent,
+    AuthorDetailsComponent,
+    ToggleComponent,
+    TabGroupComponent,
+    TabPanelComponent,
+    TabsComponent,
+    TabBsGroupComponent,
+    CounterComponent,
+    TabContentDirective,
+  ],
+  imports: [BrowserModule, AppRoutingModule, FormsModule],
+  providers: [],
+  bootstrap: [AppComponent],
 })
 export class AppModule { }

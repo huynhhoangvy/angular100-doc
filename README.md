@@ -30,7 +30,7 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 
 ## Day #2 - Explore app
 
-- <app-root> inside index.html
+- `<app-root>` inside index.html
 - module
 - ngModule - angular component
 - a component can be declared in only one module/place
@@ -47,10 +47,9 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 - if else: `<div *ngIf="data === condition; else someTag" >`
 - ng-template:
 
-```
+```typescript
     <ng-template #someTag>
     <ng-templage [ngIf]="data == condition">
-
 ```
 
 ## Day #5 - Structure directive - ngForOf
@@ -61,7 +60,7 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 
 - multiple structure directive:
 
-```
+```HTML
     <div *ngFor="”let" item of list”>
         <div *ngIf="”somethingGoood”">
             More code
@@ -69,7 +68,7 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
     </div>
 ```
 
-```
+```HTML
     <div *ngFor="”let" item of list”>
         <ng-container *ngIf="”somethingGoood”">
             More code
@@ -112,7 +111,7 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 - 2 way binding: `<input type="text" [(ngModel)]="name">` === `<input type="text" [ngModel]="name" (ngModelChange)="name = $event">`
 - create input & output:
 
-```
+```typescript
     @Input() checked: boolean;
     @Output() checkedChange = new EventEmitter<boolean>(); // must have `change` suffix
     [(checked)]="isChecked"
@@ -122,10 +121,26 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 
 - template variable:
 
-```
+```HTML
 <button (click)="toggleComp.toggle()"></button>
 <app-toggle #toggleComp></app-toggle>
 
+```
+
+```typescript
+ViewChild(selector: string | Function | Type<any>, opts?: {
+  read?: any;
+  static?: boolean;
+})
+```
+
+```typescript
+@ViewChildren(ToggleComponent) toggleList: QueryList<ToggleComponent>;
+
+
+ngAfterViewInit() {
+  console.log(this.toggleList);
+}
 ```
 
 - `static` grants access of component in ngOnInit; however, childComponent must not be in any structure directive
@@ -136,21 +151,21 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 
 - `interface` is used to define types for an object
 
-```
+```typescript
 interface User {
-    firstName: string;
-    lastName: string;
-    age: number;
-    job?: string; // optional property
+  firstName: string;
+  lastName: string;
+  age: number;
+  job?: string; // optional property
 }
 ```
 
-```
+```typescript
 type User = {
-    firstName: string;
-    lastName: string;
-    age: number;
-    job?: string;
+  firstName: string;
+  lastName: string;
+  age: number;
+  job?: string;
 };
 ```
 
@@ -162,38 +177,38 @@ type User = {
   `type StringOrNumber = string | number;`
 - Intersection type A and B
 
-```
-    function merge<T1, T2>(o1: T1, o2: T2): T1 & T2 {
-    return { ...o1, ...o2 };
-    }
+```typescript
+function merge<T1, T2>(o1: T1, o2: T2): T1 & T2 {
+  return { ...o1, ...o2 };
+}
 
-    merge({ foo: 'bar' }, { bar: 'foo' });
+merge({ foo: "bar" }, { bar: "foo" });
 ```
 
 - Conditional type: `T extends U ? X : Y`
 - Type alias
 
-```
-    @Component({
-    selector: 'flex-container',
-    template: `<ng-content></ng-content>`,
-    })
-    export class FlexComponent {
-    @Input() flexDirection: string = 'row';
+```typescript
+@Component({
+  selector: "flex-container",
+  template: `<ng-content></ng-content>`,
+})
+export class FlexComponent {
+  @Input() flexDirection: string = "row";
 
-    @HostBinding('style.display') get display() {
-        return 'flex';
-    }
+  @HostBinding("style.display") get display() {
+    return "flex";
+  }
 
-    @HostBinding('style.flex-direction') get direction() {
-        return this.flexDirection;
-    }
-    }
+  @HostBinding("style.flex-direction") get direction() {
+    return this.flexDirection;
+  }
+}
 ```
 
 - Alternative:
 
-```
+```typescript
     type FlexDirection = 'row' | 'column' | 'row-reverse' | 'column-reverse';
 
     @Component({
@@ -211,7 +226,7 @@ type User = {
     }
 ```
 
-```
+```HTML
     <!-- app.component.html -->
     <flex-container>
     <button>Submit</button>
@@ -226,16 +241,16 @@ type User = {
 
 - Type alias + conditional type
 
-```
-    type ObjectDictionary<T> = { [key: string]: T };
-    type ArrayDictionary<T> = { [key: string]: T[] };
-    export type Dictionary<T> = T extends []
-    ? ArrayDictionary<T[number]>
-    : ObjectDictionary<T>;
+```typescript
+type ObjectDictionary<T> = { [key: string]: T };
+type ArrayDictionary<T> = { [key: string]: T[] };
+export type Dictionary<T> = T extends []
+  ? ArrayDictionary<T[number]>
+  : ObjectDictionary<T>;
 
-    type StringDictionary = Dictionary<string>; // {[key: string]: string}
-    type NumberArrayDictionary = Dictionary<number[]>; // {[key: string]: number[]}
-    type UserEntity = Dictionary<User>; // {[key: string]: User}
+type StringDictionary = Dictionary<string>; // {[key: string]: string}
+type NumberArrayDictionary = Dictionary<number[]>; // {[key: string]: number[]}
+type UserEntity = Dictionary<User>; // {[key: string]: User}
 ```
 
 ## Day #13 - Content projection
@@ -255,17 +270,17 @@ type User = {
 - `ng-template`: a template that render with some conditions
 - `ng-container`: avoid unnecessary wrapper
 
-```
+```HTML
 <ng-container [ngTemplateOutlet]="counterTmpl"></ng-container> items.
 <ng-template #counterTmpl>
-	<span class="badge badge-primary">{{ counter }}</span> items
+<span class="badge badge-primary">{{ counter }}</span> items
 </ng-template>
 ```
 
-```
+```HTML
 <ng-container
     *ngTemplateOutlet="linkTemplate; context: { $implicit: link }"
-    <!-- *ngTemplateOutlet="linkTemplate; context: { link: link }" -->
+    *ngTemplateOutlet="linkTemplate; context: { link: link }"
 >
     <!-- <ng-container
     [ngTemplateOutlet]="linkTemplate"
@@ -274,12 +289,12 @@ type User = {
 </ng-container>
 ```
 
-```
+```HTML
 <ng-template #linkTemplate let-l>
 <!-- <ng-template #linkTemplate let-l="link"> -->
-	<h4>
-		{{l}}
-	</h4>
+<h4>
+{{l}}
+</h4>
 </ng-template>
 ```
 
@@ -287,27 +302,27 @@ type User = {
 
 - `@Injectable()`, `NgModule()`, `@Component()`
 
-```
-    @Injectable({
-      providedIn: "root",
-    })
-    export class CartService {
-      // properties and methods
-    }
+```typescript
+@Injectable({
+  providedIn: "root",
+})
+export class CartService {
+  // properties and methods
+}
 ```
 
-```
+```typescript
 @Component({
-selector: "app-product",
-templateUrl: "./product.component.html",
-styleUrls: ["./product.component.css"],
+  selector: "app-product",
+  templateUrl: "./product.component.html",
+  styleUrls: ["./product.component.css"],
 })
 export class ProductComponent implements OnInit {
-constructor(private cartService: CartService) {}
+  constructor(private cartService: CartService) {}
 
-ngOnInit() {
-console.log(this.cartService.calculateTotal());
-}
+  ngOnInit() {
+    console.log(this.cartService.calculateTotal());
+  }
 }
 ```
 
@@ -316,52 +331,48 @@ console.log(this.cartService.calculateTotal());
 - Inject parent component to child component
 - Provide another component with the same API
 
-```
+```typescript
 @Component({
-  selector: 'app-bs-tab-group',
-  templateUrl: './bs-tab-group.component.html',
-  styleUrls: ['./bs-tab-group.component.css'],
+  selector: "app-bs-tab-group",
+  templateUrl: "./bs-tab-group.component.html",
+  styleUrls: ["./bs-tab-group.component.css"],
   providers: [
     {
       provide: TabGroupComponent,
-      useExisting: BsTabGroupComponent
-    }
-  ]
+      useExisting: BsTabGroupComponent,
+    },
+  ],
 })
-export class BsTabGroupComponent extends TabGroupComponent {
-}
+export class BsTabGroupComponent extends TabGroupComponent {}
 ```
 
 - Forward reference
 
-```
+```typescript
 const BsTabGroupProvider = {
   provide: TabGroupComponent,
-  useExisting: forwardRef(() => BsTabGroupComponent)
-}
+  useExisting: forwardRef(() => BsTabGroupComponent),
+};
 
 @Component({
-  selector: 'app-bs-tab-group',
-  templateUrl: './bs-tab-group.component.html',
-  styleUrls: ['./bs-tab-group.component.css'],
-  providers: [
-    BsTabGroupProvider
-  ]
+  selector: "app-bs-tab-group",
+  templateUrl: "./bs-tab-group.component.html",
+  styleUrls: ["./bs-tab-group.component.css"],
+  providers: [BsTabGroupProvider],
 })
-export class BsTabGroupComponent extends TabGroupComponent {
-}
+export class BsTabGroupComponent extends TabGroupComponent {}
 ```
 
 - Provider syntax
   `useClass`
 
-```
+```typescript
 @NgModule({
   providers: [SomeClass]
 })
 ```
 
-```
+```typescript
 @NgModule({
   providers: [{ provide: SomeClass, useClass: SomeClass}]
 })
@@ -369,7 +380,7 @@ export class BsTabGroupComponent extends TabGroupComponent {
 
 `useExisting`
 
-```
+```typescript
 @Component({
   providers: [
     {
@@ -382,7 +393,7 @@ export class BsTabGroupComponent extends TabGroupComponent {
 
 `useFactory`
 
-```
+```typescript
 @Component({
   providers: [
     {
@@ -397,7 +408,7 @@ export class BsTabGroupComponent extends TabGroupComponent {
 
 `useValue`
 
-```
+```typescript
 @Component({
   providers: [
     {
@@ -407,3 +418,23 @@ export class BsTabGroupComponent extends TabGroupComponent {
   ]
 })
 ```
+
+## Day #17 - `ContentType` and `ContentChildren` in Angular
+
+- `@Component` is just `@Directive` with template
+
+- `ContentChild` can be used to lazy load component
+
+`@ContentChild(TabContentDirective, { static: true, read: TemplateRef }) explicitBody: TemplateRef<unknown>;`
+
+- `@ContentChildren`:
+
+`@ContentChildren(forwardRef(() => TabPanelComponent)) tabPanels: QueryList<TabPanelComponent>;`
+
+- `forwardRef()` can be used to resolve `cannot access Component before initialization
+
+- `@ViewChildren`: your own child; `@ContentChildren`: someone's else child
+
+- `View`: template that component directly interact with (crud). It is everything inside `templateUrl` or `template` of `@Component`, except for `ng-content`. A component's view is a black box for other components (shadow DOM)
+
+- `Content`: template that is projected inside component/directive tag (light DOM)

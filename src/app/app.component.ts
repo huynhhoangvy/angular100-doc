@@ -18,6 +18,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   counter = 1;
   navs = ['Active', 'Link 1', 'Link 2'];
   currentIndex = 0;
+  showTab4 = true;
 
   @ViewChildren(ToggleComponent) toggleComps: QueryList<ToggleComponent>;
   @ViewChild('nameInput', { static: true, read: ElementRef }) nameInput: ElementRef<HTMLInputElement>;

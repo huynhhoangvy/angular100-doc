@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ContentChildren, QueryList, AfterContentInit, forwardRef } from '@angular/core';
 import { TabPanelComponent } from './tab-panel.component';
 
 @Component({
@@ -40,10 +40,17 @@ import { TabPanelComponent } from './tab-panel.component';
     }
   `]
 })
-export class TabGroupComponent {
+export class TabGroupComponent implements AfterContentInit {
   tabPanelList: TabPanelComponent[] = [];
   @Input() activeIndex = 0;
   @Output() activeIndexChange = new EventEmitter<number>();
+
+  @ContentChildren(forwardRef(() => TabPanelComponent)) tabPanels: QueryList<TabPanelComponent>;
+
+  ngAfterContentInit() {
+    console.log({ tabPanel: this.tabPanels });
+    this.tabPanels.changes.subscribe(console.log);
+  }
 
   addTab(tab: TabPanelComponent) {
     this.tabPanelList = [...this.tabPanelList, tab];
