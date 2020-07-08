@@ -1,33 +1,5 @@
 # Angular100Doc
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.1.9.
-
-## Development server
-
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
-
-## Code scaffolding
-
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
-
-## Build
-
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
-
-## Day #1 - Environment setup & installation
-
 ## Day #2 - Explore app
 
 - `<app-root>` inside index.html
@@ -438,3 +410,120 @@ export class BsTabGroupComponent extends TabGroupComponent {}
 - `View`: template that component directly interact with (crud). It is everything inside `templateUrl` or `template` of `@Component`, except for `ng-content`. A component's view is a black box for other components (shadow DOM)
 
 - `Content`: template that is projected inside component/directive tag (light DOM)
+
+## Day #18 - Pipe
+
+- `{{ interpolated_value | pipe_name }}`
+
+- Pipe parameter: `{{ value | pipe: param1:param2 }}`
+
+- Pipe chaining: `{{ value | pipe1 | pipe2 }}`
+
+- Custom pipe:
+
+  create `class implements interface PipeTransform`
+
+  ```typescript
+  interface PipeTransform {
+    transform(value: any, ...arge: any[]: any);
+  }
+  ```
+
+  ```typescript
+  export class AppTitlePipe implements PipeTransform {
+    transform(resourceId: string): string {
+      return resourceId ? "Edit" : "Add";
+    }
+  }
+  ```
+
+  Add pipe decorator
+
+  ```typescript
+  @Pipe({
+    name: 'Title'; //required
+  })
+
+  export class AppTitlePipe implements PipeTransform {
+    ...
+  }
+  ```
+
+```HTML
+<h2 class='ibox-title'>{{ userId | appTitle }}</h2>
+```
+
+Custom pipe parameters
+
+```typescript
+transform(
+  resourceId: string,
+  addText: string = 'Add',
+  editText: string = 'Edit',
+): string {
+  return resourceId ? editText : addText;
+}
+```
+
+```HTML
+{{ userId | appTitle: 'Set': 'Change }}
+```
+
+- Detect changes with data binding in pipes
+
+Primitive type
+
+```typescript
+export class PipeExampleComponent implements OnInit {
+  userIdChangeAfterFiveSeconds = "14324";
+  time$: Observable<number> = timer(0, 1000).pipe(
+    map((val) => 5 - (val + 1)),
+    startWith(5),
+    finalize(() => {
+      this.userIdChangeAfterFiveSeconds = "";
+    }),
+    takeWhile((val) => val >= 0)
+  );
+}
+```
+
+```HTML
+<p>
+  Set userId to empty string after {{ timer | async }} seconds, notice the text "Edit" will be set to "Add"
+</p>
+<pre ngNonBindable>{{ userIdChangeAfterFiveSeconds | appTitle }}</pre>
+<div>Form title: {{ userIdChangeAfterFiveSeconds | appTitle }} User</div>
+```
+
+Reference type
+`pipe` cannot detect change in reference type, use `immutable` method or `pure:false`
+
+```typescript
+@Pipe({
+  name: "isAdult",
+  // pure: false,
+})
+export class IsAdultPipe implements PipeTransform {
+  transform(arr: User[]): User[] {
+    return arr.filter((x) => x.age > 18);
+  }
+}
+```
+
+```HTML
+<div class="row">
+  <div class="col-xs-6">
+    <h4>Full user list</h4>
+    <div *ngFor="let user of users">{{ user.name }}</div>
+  </div>
+  <div class="col-xs-6">
+    <div class="ml-4">
+      <h4>Adult user list</h4>
+      <div *ngFor="let user of users | isAdult">{{ user.name }}</div>
+    </div>
+  </div>
+</div>
+```
+
+- `*ngFor="let user of users | pipeName"`
+- nested pipe in pipe
