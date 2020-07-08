@@ -1,3 +1,4 @@
+import { AdultPipe } from './adult.pipe';
 import { TabPanelComponent } from './tab/tab-panel.component';
 import { HelloComponent } from './hello/hello.component';
 import { BrowserModule } from '@angular/platform-browser';
@@ -15,6 +16,7 @@ import { TabGroupComponent } from './tab/tab-group.component';
 import { TabBsGroupComponent } from './tab/tab-bs-group.component';
 import { CounterComponent } from './counter/counter.component';
 import { TabContentDirective } from './tab/tab-content.directive';
+import { FormatAddressPipe } from './format-address.pipe';
 
 @NgModule({
   declarations: [
@@ -30,6 +32,8 @@ import { TabContentDirective } from './tab/tab-content.directive';
     TabBsGroupComponent,
     CounterComponent,
     TabContentDirective,
+    FormatAddressPipe,
+    AdultPipe,
   ],
   imports: [BrowserModule, AppRoutingModule, FormsModule],
   providers: [],

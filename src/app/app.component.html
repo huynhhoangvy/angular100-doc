@@ -4,7 +4,32 @@ app component
 </p>
 <hr />
 <hr />
+<p>{{ currentDate | date }}</p>
+<p>{{ currentDate | date: "shortDate" }}</p>
+<p>{{ currentDate | date: "mediumDate" }}</p>
+<p>{{ currentDate | date: "fullDate" }}</p>
+<p>{{ currentDate | date: "yyyy/MM/dd" }}</p>
+<p>{{ "UPPERCASE" | lowercase }}</p>
+<p>{{ "lowercase" | uppercase }}</p>
+<p>{{ 200 | currency }}</p>
+<p>{{ 50000 | currency: "VND" }}</p>
+<p>{{ 2.1214572 | number: "1.1-3" }}</p>
+<p>{{ 0.42 | percent }}</p>
+<p>{{ user | json }}</p>
+<!-- {{ time }} -->
+{{ interval$ | async }}
+<br />
+<p>{{ addr | formatAddress: "para1" }}</p>
+Full user list
+<ul>
+  <li *ngFor="let user of user">{{ user.name }} - {{ user.age }}</li>
+</ul>
+Adult list
+<ul>
+  <li *ngFor="let user of user | adult">{{ user.name }} - {{ user.age }}</li>
+</ul>
 
+<button (click)="addUser()">add user</button>
 <hr />
 <hr />
 <!-- <app-tab-group [(activeIndex)]="currentIndex">
