@@ -20,7 +20,7 @@
     "@angular/platform-browser-dynamic": "~9.1.11",
     "@angular/router": "~9.1.11",
     "g": "^2.0.1",
-    "rxjs": "~6.5.4",
+    "rxjs": "^6.5.5",
     "tslib": "^1.10.0",
     "tsyringe": "^4.3.0",
     "zone.js": "~0.10.2"

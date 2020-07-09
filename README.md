@@ -1,20 +1,20 @@
 # Angular100Doc
 
-## Day #2 - Explore app
+## DAY #2 - EXPLORE APP
 
 - `<app-root>` inside index.html
 - module
 - ngModule - angular component
 - a component can be declared in only one module/place
 
-## Day #3 - Data binding
+## DAY #3 - DATA BINDING
 
 - interpolation: `{{ data }}`
 - property binding: `[value]="data.value"`
 - event binding: `(click)="handleClick()"`
 - 2 way binding: `[(ngModel)]="data.value" // FormsModule needed`
 
-## Day #4 - Structure directive - ngIf
+## DAY #4 - STRUCTURE DIRECTIVE - NGIF
 
 - if else: `<div *ngIf="data === condition; else someTag" >`
 - ng-template:
@@ -24,7 +24,7 @@
     <ng-templage [ngIf]="data == condition">
 ```
 
-## Day #5 - Structure directive - ngForOf
+## DAY #5 - STRUCTURE DIRECTIVE - NGFOROF
 
 - `<div *ngFor="let author of authors; idx as index">`
 - local variables: \$implicit: T; index; count; first; last; even; odd
@@ -53,7 +53,7 @@
     </div>
 ```
 
-## Day #6 - Attribute directive
+## DAY #6 - ATTRIBUTE DIRECTIVE
 
 - class binding: `<div [class.tab-active]="isTabActive">`, `[class]="clasExpr"` with classExpr is string, array string, object
 - style binding: `<div [style.width]="'value'">`
@@ -61,7 +61,7 @@
   `[style]="styleExpr"` with styleExpr is string, array string, object
 - font-size & fontSize are both acceptable
 
-## Day #7 - Component interaction
+## DAY #7 - COMPONENT INTERACTION
 
 - ngOnInit: run after component is created, after constructor and input binding
 - validate in ngOnChanges or setter/getter; ngOnChanges is better for multiple input validation
@@ -71,14 +71,14 @@
 - `<button (click)="currentProgress = currentProgress + 1">increase</button>`
 - external name/alias is not recommended
 
-## Day #8 - Component interaction - parent listens to children event
+## DAY #8 - COMPONENT INTERACTION - PARENT LISTENS TO CHILDREN EVENT
 
 - create: `@Output() delete = new EventEmitter<number>();`
 - emit: `(click)="delete.emit(author.id):`
 - implement handling method: `onDelete(id: number) { //somethimg }`
 - binding: `(delete)="onDelete($event)`
 
-## Day #9 - Custom 2 way binding
+## DAY #9 - CUSTOM 2 WAY BINDING
 
 - 2 way binding: `<input type="text" [(ngModel)]="name">` === `<input type="text" [ngModel]="name" (ngModelChange)="name = $event">`
 - create input & output:
@@ -89,7 +89,7 @@
     [(checked)]="isChecked"
 ```
 
-## Day #10 - Template variable, ViewChild, ViewChildren
+## DAY #10 - TEMPLATE VARIABLE, VIEWCHILD, VIEWCHILDREN
 
 - template variable:
 
@@ -119,7 +119,7 @@ ngAfterViewInit() {
 - `ViewChildren` subscribe changes will fail if a child is inside a structure directive; in that case, move method to ngAfterViewInit
 - `ViewChildren` does not have `static`
 
-## Day #11 - Typescript data type
+## DAY #11 - TYPESCRIPT DATA TYPE
 
 - `interface` is used to define types for an object
 
@@ -141,7 +141,7 @@ type User = {
 };
 ```
 
-## Day #12 - Typescript advanced type
+## DAY #12 - TYPESCRIPT ADVANCED TYPE
 
 - `unknown` is recommended instead of `any`
 - Union type: A or B
@@ -225,7 +225,7 @@ type NumberArrayDictionary = Dictionary<number[]>; // {[key: string]: number[]}
 type UserEntity = Dictionary<User>; // {[key: string]: User}
 ```
 
-## Day #13 - Content projection
+## DAY #13 - CONTENT PROJECTION
 
 - `<ng-content></ng-content>` work the same as React's `{children}`
 - multiple `ng-content` is not allowed (without selector)
@@ -237,7 +237,7 @@ type UserEntity = Dictionary<User>; // {[key: string]: User}
 - ngProjectAs: `<span ngProjectAs="label">` `<ng-container ngProjectAs="label">`
 - `ng-container` works the same as React `<>`
 
-## Day #14 - `ng-template`, `ngTemplateOutlet` and `ng-container`
+## DAY #14 - `NG-TEMPLATE`, `NGTEMPLATEOUTLET` AND `NG-CONTAINER`
 
 - `ng-template`: a template that render with some conditions
 - `ng-container`: avoid unnecessary wrapper
@@ -270,7 +270,7 @@ type UserEntity = Dictionary<User>; // {[key: string]: User}
 </ng-template>
 ```
 
-## Day #15 - Dependency injection
+## DAY #15 - DEPENDENCY INJECTION
 
 - `@Injectable()`, `NgModule()`, `@Component()`
 
@@ -298,7 +298,7 @@ export class ProductComponent implements OnInit {
 }
 ```
 
-## Day #16 - Dependency injection in Angular
+## DAY #16 - DEPENDENCY INJECTION IN ANGULAR
 
 - Inject parent component to child component
 - Provide another component with the same API
@@ -391,7 +391,7 @@ export class BsTabGroupComponent extends TabGroupComponent {}
 })
 ```
 
-## Day #17 - `ContentType` and `ContentChildren` in Angular
+## DAY #17 - `CONTENTTYPE` AND `CONTENTCHILDREN` IN ANGULAR
 
 - `@Component` is just `@Directive` with template
 
@@ -411,7 +411,7 @@ export class BsTabGroupComponent extends TabGroupComponent {}
 
 - `Content`: template that is projected inside component/directive tag (light DOM)
 
-## Day #18 - Pipe
+## DAY #18 - PIPE
 
 - `{{ interpolated_value | pipe_name }}`
 
@@ -527,3 +527,151 @@ export class IsAdultPipe implements PipeTransform {
 
 - `*ngFor="let user of users | pipeName"`
 - nested pipe in pipe
+
+```typescript
+export class AdultPipe implements PipeTransform {
+  transform(value, pipe) {
+    pipe.transform();
+    return value.filter((x) => x.age >= 18);
+  }
+}
+```
+
+## DAY #19 - RX OBSERVABLE CONCEPTS
+
+- `Observable`:
+  A collection of values or events in the future. Values and events created in the future will be passed to `Observer`
+  `Observable` is a function which take an `Observer` and return a function to cancel execution (`unsubscribe`)
+
+- `Observer`:
+  A collection of callbacks to listen to values sent from `Observable`
+
+- `Subscription`:
+  Result after a `Observable` is resolved, have a `unsubscribe` to resolve stream
+
+- `Operators`:
+  Pure functions ??
+
+- `Subject`:
+  Send data to multiple `Observers` (multicasting)
+
+- `Scheduler`:
+  Control when a `subscription` start, when to send message
+
+- Create `Observable`:
+
+  ```typescript
+  const observable = new Observable(function subscribe(observer) {
+    // done creating observable
+    const id = setTimeout(() => {
+      observer.next("hello rxjs");
+      observer.complete();
+    }, 1000);
+    return function unsubscribe() {
+      //cleanup
+      clearTimeout(id);
+    };
+  });
+  ```
+
+- Invoke `Observable`:
+  `subscribe` to invoke, a `Subscription` is returned
+
+  ```typescript
+  const subsription = observable.subscribe({
+    next: (value) => {
+      console.log(value);
+    },
+    error: (err) => {
+      console.error(err);
+    },
+    complete: () => {
+      console.log("done");
+    },
+  });
+  ```
+
+- Execute `Observable`:
+  `new Observable(function subscribe(observer)) {...}`
+  Notification:
+  `next`: send a value, `number`, `string`, `object`, etc
+  `error`: send a javascript error or exception
+  `complete`: send no value but send a message instead, to notify that the stream is completed in order for `Observer` to execute some actions
+  Either `error` or `complete` can be sent once
+
+- Dispose `Observable` execution:
+
+  ```typescript
+  const subscription = observable.subscribe({
+    next: (value) => {
+      console.log(value);
+    },
+    error: (error) => {
+      console.log(error);
+    },
+    complete: () => {
+      console.log("Done");
+    },
+  });
+
+  setTimeout(() => {
+    subscription.unsubscribe();
+  }, 500);
+  ```
+
+- `Observer`:
+  Consumes data sent from `Observable`. `Observer` consists of 3 callbacks respectively for each notification: `next`, `error`, `complete`
+
+  ```typescript
+  const observer = {
+    next: (x) => console.log("Observer got a next value: " + x),
+    error: (err) => console.error("Observer got an error: " + err),
+    complete: () => console.log("Observer got a complete notification"),
+  };
+  ```
+
+  ```typescript
+  observable.subscribe(
+    (x) => console.log("Observer got a next value: " + x),
+    (err) => console.error("Observer got an error: " + err),
+    () => console.log("Observer got a complete notification")
+  );
+  ```
+
+  ```typescript
+  const observer = {
+    next: (x) => console.log("Observer got a next value: " + x),
+    error: (err) => console.error("Observer got an error: " + err),
+    complete: () => console.log("Observer got a complete notification"),
+  };
+  ```
+
+  ```typescript
+  observable.subscribe(
+    (x) => console.log("Observer got a next value: " + x),
+    null,
+    () => console.log("Observer got a complete notification")
+  );
+  ```
+
+- `Subscription`:
+  Cancel `Observable` execution
+
+  ```typescript
+  const foo = interval(500);
+  const bar = interval(700);
+
+  const subscription = foo.subscribe((x) => console.log("first: " + x));
+  const childSub = bar.subscribe(x => console.log('second: ' + x));
+
+  subscription.add(childSub);
+
+  setTimeout(() => {
+    // Unsubscribes BOTH `subscription` and `childSub`
+    subscription.unsubscribe();
+  }, 2000);
+
+  ngOnDestroy() {
+    subscription.unsubscribe();
+  }
+  ```

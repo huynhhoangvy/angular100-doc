@@ -67,6 +67,5 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
   ngAfterViewInit() {
     this.toggleComps.changes.subscribe(console.log);
-    console.log('hello');
   }
 }
