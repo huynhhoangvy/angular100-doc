@@ -550,7 +550,7 @@ export class AdultPipe implements PipeTransform {
   Result after a `Observable` is resolved, have a `unsubscribe` to resolve stream
 
 - `Operators`:
-  Pure functions ??
+  Pure functions/methods to use with `Observable`
 
 - `Subject`:
   Send data to multiple `Observers` (multicasting)
@@ -675,3 +675,148 @@ export class AdultPipe implements PipeTransform {
     subscription.unsubscribe();
   }
   ```
+
+## DAY #20 - RXJS CREATION
+
+- `of()`:
+  create `Observable` from any value: `primitive`, `array`, `object`, `function`,...
+  `of()` receives the values and `complete` right away as soon as all the value are `emitted`
+
+  Primitive value
+
+  ```typescript
+  // output: 'hello'
+  // complete: 'complete'
+  of("hello").subscribe(observer);
+  ```
+
+  Object/Array
+
+  ```typescript
+  // output: [1, 2, 3]
+  // complete: 'complete'
+  of([1, 2, 3]).subscribe(observer);
+  ```
+
+  Sequence of values
+
+  ```typescript
+  // output: 1, 2, 3, 'hello', 'world', {foo: 'bar'}, [4, 5, 6]
+  // complete: 'complete'
+  of(1, 2, 3, "hello", "world", { foo: "bar" }, [4, 5, 6]).subscribe(observer);
+  ```
+
+- `from()`:
+  create `Observable` from: `Iterable` or `Promise`
+
+  Array
+
+  ```typescript
+  // output: 1, 2, 3
+  // complete: 'complete'
+  from([1, 2, 3]).subscribe(observer);
+  ```
+
+  String
+
+  ```typescript
+  // output: 'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'
+  // complete: 'complete'
+  from("hello world").subscribe(observer);
+  ```
+
+  Map/Set
+
+  ```typescript
+  const map = new Map();
+  map.set(1, "hello");
+  map.set(2, "bye");
+
+  // output: [1, 'hello'], [2, 'bye']
+  // complete: 'complete'
+  from(map).subscribe(observer);
+
+  const set = new Set();
+  set.add(1);
+  set.add(2);
+
+  // output: 1, 2
+  // complete: 'complete'
+  from(set).subscribe(observer);
+  ```
+
+  Promise
+
+  ```typescript
+  // output: 'hello world'
+  // complete: 'complete'
+  from(Promise.resolve("hello world")).subscribe(observer);
+  ```
+
+  `from()` unwrapps and returns resolved value of `Promise`. This is a way of converting a `Promise` into an `Observable`
+
+- `fromEvent()`
+  Used to convert an event into an `Observable`
+
+  ```typescript
+  const btn = document.querySelector("#btn");
+  const input = document.querySelector("#input");
+
+  // output (example): MouseEvent {...}
+  // complete: không có gì log.
+  fromEvent(btn, "click").subscribe(observer);
+
+  // output (example): KeyboardEvent {...}
+  // complete: không có gì log.
+  fromEvent(input, "keydown").subscribe(observer);
+  ```
+
+  `fromEvent()` creates an `Observable` without automatically implement `complete`. Manually invoke `unsubscribe` is needed
+
+- `fromEventPattern()`
+
+  `fromEventPattern()` is different from `fromEvent()` in terms of usage and event type
+
+  ```typescript
+  // fromEvent() từ ví dụ trên
+  // output: MouseEvent {...}
+  fromEvent(btn, "click").subscribe(observer);
+
+  // fromEventPattern
+  // output: MouseEvent {...}
+  fromEventPattern(
+    (handler) => {
+      btn.addEventListener("click", handler);
+    },
+    (handler) => {
+      btn.removeEventListener("click", handler);
+    }
+  ).subscribe(observer);
+  ```
+
+  ```typescript
+  // output: 10 10
+  fromEvent(btn, "click")
+    .pipe(map((ev: MouseEvent) => ev.offsetX + " " + ev.offsetY))
+    .subscribe(observer);
+
+  // fromEventPattern
+  // Ở ví dụ này, chúng ta sẽ tách `addHandler` và `removeHandler` ra thành function riêng nhé
+
+  function addHandler(handler) {
+    btn.addEventListener("click", handler);
+  }
+
+  function removeHandler(handler) {
+    btn.removeEventListener("click", handler);
+  }
+
+  // output: 10 10
+  fromEventPattern(
+    addHandler,
+    removeHandler,
+    (ev: MouseEvent) => ev.offsetX + " " + ev.offsetY
+  ).subscribe(observer);
+  ```
+
+`fromEventPattern()` provides API to change
