@@ -680,7 +680,7 @@ export class AdultPipe implements PipeTransform {
 
 - `of()`:
   create `Observable` from any value: `primitive`, `array`, `object`, `function`,...
-  `of()` receives the values and `complete` right away as soon as all the value are `emitted`
+  `of()` receives, returns the values and `complete` right away as soon as all the value are `emitted`
 
   Primitive value
 
@@ -752,7 +752,7 @@ export class AdultPipe implements PipeTransform {
   // complete: 'complete'
   from(Promise.resolve("hello world")).subscribe(observer);
   ```
-
+  `from()` returns each item of `Iterable`
   `from()` unwrapps and returns resolved value of `Promise`. This is a way of converting a `Promise` into an `Observable`
 
 - `fromEvent()`
@@ -819,4 +819,120 @@ export class AdultPipe implements PipeTransform {
   ).subscribe(observer);
   ```
 
-`fromEventPattern()` provides API to change
+`fromEventPattern()`receives 3 parameters: add..., remove... and `projectFunc`(optional)
+`fromEventPattern()` provides API to transform event from original API of the event
+`addEventListener`and `removeEventListener`APIs are used directly from the DOM to transform into `Observable`. `fromtEventPattern()`can be used to transform more complicated API into `Observable`, such as `SignalR Hub`
+
+  ```typescript
+// _getHub() là hàm trả về Hub.
+const hub = this._getHub(url);
+return fromEventPattern(
+  (handler) => {
+    // mở websocket
+    hub.connection.on(methodName, handler);
+
+    if (hub.refCount === 0) {
+      hub.connection.start();
+    }
+
+    hub.refCount++;
+  },
+  (handler) => {
+    hub.refCount--;
+    // đóng websocket khi unsubscribe
+    hub.connection.off(methodName, handler);
+    if (hub.refCount === 0) {
+      hub.connection.stop();
+      delete this._hubs[url];
+    }
+  }
+);  // _getHub() returns Hub
+  const hub = this._getHub(url);
+  return fromEventPattern(
+    (handler) => {
+      // open websocket
+      hub.connection.on(methodName, handler);
+
+      if (hub.refCount === 0) {
+        hub.connection.start();
+      }
+
+      hub.refCount++;
+    },
+    (handler) => {
+      hub.refCount--;
+      // close websocket on unsubscribe
+      hub.connection.off(methodName, handler);
+      if (hub.refCount === 0);
+      delete this._hub[url];
+    }
+  );
+```
+
+- `interval(timeInterval)`
+`interval()` is a function to create `Observable` which emit interger from 0 to 1 occasionally, alike `setInterval`
+
+  ```typescript
+  // output: 0, 1, 2, 3, 4, ...
+  interval(1000) // emit each second
+    .subscribe(observer);
+  ```
+
+Like `fromtEvent()`, `interval()`does not implicitly implement `complete`, this needs to be handled manually
+
+- `timer()`
+`timer()`can be used in 2 ways:
+  - `timer(timeInterval)` create `Observable` which emits value after a period time. This will auto implement `complete`
+  - `timer(timeInterval, periodInterval)` create `Observable` which emits value after a period time and emits value after each cycle/run. This way of use is similar to `interval()`, however, `timer()` supports delaying before `emit`. This will not auto `complete`
+
+  ```typescript
+  // output: after 1 sec → 0
+  // complete: 'complete'
+  timer(1000).subscribe(observer);
+
+  // output: after 1 sec → 0, 1, 2, 3, 4, 5,...
+  timer(1000, 1000).subscribe(observer);
+
+- `throwError()` (`catchAndRethrow`)
+  `throwError()` is used to create `Observable`which instead of `emit` value, throw an error after `subscribe`
+
+  ```typescript
+  // error: 'an error'
+  throwError('an error').subscribe(observer);
+  ```
+
+  `throwError()` is commonly used in error handling of an `Observable`, after handling the error, we want to throw error to the next `ErrorHandler`
+  When working with `Observable`, there will be `operators`which requires you to provide an `Observable` (`switchMap`, `catchError`), using `throwError`will be a wise choice
+
+- `defer()`
+  `defer()` receives an `Observablefactory`and returns this `Observable`. `defer()` will use this `ObservableFactory` to create a new `Observable` for each `subscriber`
+
+  ```typescript
+  // of()
+  const now$ = of(Math.random());
+  // output: 0.4146530439875191
+  now$.subscribe(observer);
+  // output: 0.4146530439875191
+  now$.subscribe(observer);
+  // output: 0.4146530439875191
+  now$.subscribe(observer);// of()
+    const now$ = of(Math.random());
+    // output: 0.456498
+  ```
+
+  `of()` returns the same value in all 3 times
+
+  ```typescript
+  const now$ = defer(() => of(Math.random()));
+  // output: 0.27312186273281935
+  now$.subscribe(observer);
+  // output: 0.7180321390218474
+  now$.subscribe(observer);
+  // output: 0.9626312890837065
+  now$.subscribe(observer);const now$ = defer(() => of(Math.random()))
+  ```
+
+  `defer()` returns different values for each `subscribe`
+  Get lazy evaluate, run whenever `.subscribe`, `of` runs and create new `Observable`, `Math.random` runs and create new value
+  `defer()` (combine with `retry`) will be the solution when we need to `retry` an `Observable` which need to compare with a random value
+
