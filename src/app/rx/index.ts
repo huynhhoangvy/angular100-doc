@@ -1,4 +1,4 @@
-import {from, fromEvent, fromEventPattern, interval, of, throwError, timer} from 'rxjs';
+import { from, fromEvent, fromEventPattern, interval, of, throwError, timer } from 'rxjs';
 
 
 //////////////////////////////////////////
@@ -54,11 +54,11 @@ import {from, fromEvent, fromEventPattern, interval, of, throwError, timer} from
 const observer = {
     next: val => console.log(val),
     error: err => console.error(err),
-    complete: () => console.log('complete')
+    complete: () => console.log('complete'),
 };
 
 // of
-of(1, 2, 3, 4, 5, 'hello', [1, 2, 3], {foo: 'bar'}).subscribe(observer);
+of(1, 2, 3, 4, 5, 'hello', [ 1, 2, 3 ], { foo: 'bar' }).subscribe(observer);
 
 // from
 from(Promise.resolve('hello')).subscribe(observer);
@@ -73,7 +73,7 @@ fromEventPattern(
     },
     handler => {
         document.removeEventListener('click', handler);
-    }
+    },
 ).subscribe(observer);
 
 // interval

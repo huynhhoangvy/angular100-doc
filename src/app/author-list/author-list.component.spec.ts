@@ -1,6 +1,6 @@
-import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {AuthorListComponent} from './author-list.component';
+import { AuthorListComponent } from './author-list.component';
 
 describe('AuthorListComponent', () => {
     let component: AuthorListComponent;
@@ -8,9 +8,9 @@ describe('AuthorListComponent', () => {
 
     beforeEach(async(() => {
         TestBed.configureTestingModule({
-            declarations: [AuthorListComponent]
+            declarations: [ AuthorListComponent ],
         })
-            .compileComponents();
+               .compileComponents();
     }));
 
     beforeEach(() => {

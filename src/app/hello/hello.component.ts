@@ -1,14 +1,14 @@
-import {Component, OnInit} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 @Component({
     selector: 'app-hello',
     templateUrl: './hello.component.html',
-    styleUrls: ['./hello.component.scss']
+    styleUrls: [ './hello.component.scss' ],
 })
 export class HelloComponent implements OnInit {
     user = {
         name: 'Foo',
-        age: 10
+        age: 10,
     };
 
     authors = [
@@ -33,20 +33,20 @@ export class HelloComponent implements OnInit {
     active = true;
     number = 15;
     stringClass = 'class-1 class-2';
-    arrayClass = ['aclass-1', 'aclass-2'];
+    arrayClass = [ 'aclass-1', 'aclass-2' ];
     objectClass = {
         foo: true,
         bar: false,
         fooz: true,
-        baz: true
+        baz: true,
     };
 
     stringStyle = 'width: 100%; height: 100%';
-    arrayStyle = ['width', '100px'];
+    arrayStyle = [ 'width', '100px' ];
     objectStyle = {
         display: 'flex',
         'align-items': 'center',
-        'justify-content': 'center'
+        'justify-content': 'center',
     };
 
     constructor() {

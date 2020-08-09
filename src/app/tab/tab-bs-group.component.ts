@@ -1,5 +1,5 @@
-import {Component, forwardRef} from '@angular/core';
-import {TabGroupComponent} from './tab-group.component';
+import { Component, forwardRef } from '@angular/core';
+import { TabGroupComponent } from './tab-group.component';
 
 const tabBsGroupProviders = [
     {

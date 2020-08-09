@@ -1,5 +1,3 @@
-import {container, Lifecycle, scoped, singleton} from 'tsyringe';
-
 interface ProductModel {
     sku: string;
     name: string;
@@ -11,47 +9,47 @@ interface CartItem {
     quantity: number;
 }
 
-@singleton()
-class CartService {
-    cartServiceRandomId = Math.random();
-    selectedProducts: CartItem[] = [];
+// @singleton()
+// class CartService {
+//     cartServiceRandomId = Math.random();
+//     selectedProducts: CartItem[] = [];
+//
+//     calculateTotal(): number {
+//         return 1;
+//     }
+//
+//     addToCart(): void {
+//     }
+// }
 
-    calculateTotal(): number {
-        return 1;
-    }
+// @scoped(Lifecycle.ResolutionScoped)
+// class ProductComponent {
+//     productComponentRandomId = Math.random();
+//
+//     constructor(public cartService: CartService) {
+//     }
+// }
 
-    addToCart(): void {
-    }
-}
+// function testContainer() {
+//     console.log(container.resolve(ProductComponent));
+// }
+//
+// testContainer();
 
-@scoped(Lifecycle.ResolutionScoped)
-class ProductComponent {
-    productComponentRandomId = Math.random();
-
-    constructor(public cartService: CartService) {
-    }
-}
-
-function testContainer() {
-    console.log(container.resolve(ProductComponent));
-}
-
-testContainer();
-
-class TestCartService {
-    selectedProducts: CartItem[] = [];
-
-    calculateTotal(): number {
-        return 1;
-    }
-
-    addToCart(): void {
-    }
-}
-
-function setupTestContainer() {
-    container.register(CartService, {useClass: TestCartService});
-}
-
-setupTestContainer();
-testContainer();
+// class TestCartService {
+//     selectedProducts: CartItem[] = [];
+//
+//     calculateTotal(): number {
+//         return 1;
+//     }
+//
+//     addToCart(): void {
+//     }
+// }
+//
+// function setupTestContainer() {
+//     container.register(CartService, {useClass: TestCartService});
+// }
+//
+// setupTestContainer();
+// testContainer();

@@ -1,10 +1,10 @@
-import {Component, OnInit} from '@angular/core';
-import {Author, authors} from '../authors';
+import { Component, OnInit } from '@angular/core';
+import { Author, authors } from '../authors';
 
 @Component({
     selector: 'app-author-list',
     templateUrl: './author-list.component.html',
-    styleUrls: ['./author-list.component.scss']
+    styleUrls: [ './author-list.component.scss' ],
 })
 
 export class AuthorListComponent implements OnInit {
@@ -17,17 +17,17 @@ export class AuthorListComponent implements OnInit {
     ngOnInit(): void {
     }
 
-    onSelected(selectedAuthor: Author) {
+    onSelected( selectedAuthor: Author ) {
         this.currentAuthor = selectedAuthor;
     }
 
-    onDelete(id: number) {
+    onDelete( id: number ) {
         this.authors = this.authors.filter(author => {
             return author.id !== id;
         });
-        console.log({author: this.authors[0].firstName});
+        console.log({ author: this.authors[0].firstName });
 
-        if (this.currentAuthor.id === id) {
+        if ( this.currentAuthor.id === id ) {
             this.currentAuthor = this.authors[0];
         }
     }

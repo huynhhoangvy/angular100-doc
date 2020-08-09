@@ -14,7 +14,7 @@ export const authors = [
         lastName: 'Twell',
         email: 'ftwell0@phoca.cz',
         gender: 'Female',
-        ipAddress: '99.180.237.33'
+        ipAddress: '99.180.237.33',
     },
     {
         id: 2,
@@ -22,7 +22,7 @@ export const authors = [
         lastName: 'Signe',
         email: 'psigne1@berkeley.edu',
         gender: 'Female',
-        ipAddress: '183.243.228.65'
+        ipAddress: '183.243.228.65',
     },
     {
         id: 3,
@@ -30,7 +30,7 @@ export const authors = [
         lastName: 'McKevany',
         email: 'smckevany2@reuters.com',
         gender: 'Male',
-        ipAddress: '79.172.239.111'
+        ipAddress: '79.172.239.111',
     },
     {
         id: 4,
@@ -38,7 +38,7 @@ export const authors = [
         lastName: 'Morcomb',
         email: 'bmorcomb3@fastcompany.com',
         gender: 'Female',
-        ipAddress: '24.99.155.146'
+        ipAddress: '24.99.155.146',
     },
     {
         id: 5,
@@ -46,7 +46,7 @@ export const authors = [
         lastName: 'Dunseath',
         email: 'cdunseath4@hud.gov',
         gender: 'Female',
-        ipAddress: '89.9.91.12'
+        ipAddress: '89.9.91.12',
     },
     {
         id: 6,
@@ -54,7 +54,7 @@ export const authors = [
         lastName: 'Myrick',
         email: 'dmyrick5@gravatar.com',
         gender: 'Male',
-        ipAddress: '154.2.107.65'
+        ipAddress: '154.2.107.65',
     },
     {
         id: 7,
@@ -62,7 +62,7 @@ export const authors = [
         lastName: 'Keedy',
         email: 'pkeedy6@yandex.ru',
         gender: 'Male',
-        ipAddress: '229.139.13.203'
+        ipAddress: '229.139.13.203',
     },
     {
         id: 8,
@@ -70,7 +70,7 @@ export const authors = [
         lastName: 'Heinsen',
         email: 'vheinsen7@alexa.com',
         gender: 'Female',
-        ipAddress: '31.103.152.85'
+        ipAddress: '31.103.152.85',
     },
     {
         id: 9,
@@ -78,7 +78,7 @@ export const authors = [
         lastName: 'Bonevant',
         email: 'cbonevant8@surveymonkey.com',
         gender: 'Female',
-        ipAddress: '23.190.218.14'
+        ipAddress: '23.190.218.14',
     },
     {
         id: 10,
@@ -86,6 +86,6 @@ export const authors = [
         lastName: 'Pattullo',
         email: 'lpattullo9@ftc.gov',
         gender: 'Female',
-        ipAddress: '173.107.238.31'
-    }
+        ipAddress: '173.107.238.31',
+    },
 ];

@@ -1,4 +1,4 @@
-import {Pipe, PipeTransform} from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
 
 interface AddressLike {
     add1: string;
@@ -10,11 +10,11 @@ interface AddressLike {
 }
 
 @Pipe({
-    name: 'formatAddress'
+    name: 'formatAddress',
 })
 
 export class FormatAddressPipe implements PipeTransform {
-    transform(addr: AddressLike, para1?: string) {
+    transform( addr: AddressLike, para1?: string ) {
         console.log('pipe run: ', addr, para1);
         return (
             addr.add1 + ' ' + addr.add2 + ', ' + addr.city + ', ' + addr.state + ', ' + addr.zip + ', ' + addr.country
