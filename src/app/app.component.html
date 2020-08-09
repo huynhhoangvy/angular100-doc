@@ -1,142 +1,145 @@
 <div class="container">
-  app component
-  <p>
-    some text
-  </p>
-  <hr />
-  <hr />
+    app component
+    <p>
+        some text
+    </p>
+    <hr/>
+    <hr/>
 
-  <hr />
-  <hr />
-  <p>{{ currentDate | date }}</p>
-  <p>{{ currentDate | date: "shortDate" }}</p>
-  <p>{{ currentDate | date: "mediumDate" }}</p>
-  <p>{{ currentDate | date: "fullDate" }}</p>
-  <p>{{ currentDate | date: "yyyy/MM/dd" }}</p>
-  <p>{{ "UPPERCASE" | lowercase }}</p>
-  <p>{{ "lowercase" | uppercase }}</p>
-  <p>{{ 200 | currency }}</p>
-  <p>{{ 50000 | currency: "VND" }}</p>
-  <p>{{ 2.1214572 | number: "1.1-3" }}</p>
-  <p>{{ 0.42 | percent }}</p>
-  <p>{{ user | json }}</p>
-  <!-- {{ time }} -->
-  {{ interval$ | async }}
-  <br />
-  <p>{{ addr | formatAddress: "para1" }}</p>
-  Full user list
-  <ul>
-    <li *ngFor="let user of user">{{ user.name }} - {{ user.age }}</li>
-  </ul>
-  Adult list
-  <ul>
-    <li *ngFor="let user of user | adult">{{ user.name }} - {{ user.age }}</li>
-  </ul>
+    <hr/>
+    <hr/>
+    <p>{{ currentDate | date }}</p>
+    <p>{{ currentDate | date: "shortDate" }}</p>
+    <p>{{ currentDate | date: "mediumDate" }}</p>
+    <p>{{ currentDate | date: "fullDate" }}</p>
+    <p>{{ currentDate | date: "yyyy/MM/dd" }}</p>
+    <p>{{ "UPPERCASE" | lowercase }}</p>
+    <p>{{ "lowercase" | uppercase }}</p>
+    <p>{{ 200 | currency }}</p>
+    <p>{{ 50000 | currency: "VND" }}</p>
+    <p>{{ 2.1214572 | number: "1.1-3" }}</p>
+    <p>{{ 0.42 | percent }}</p>
+    <p>{{ user | json }}</p>
+    <!-- {{ time }} -->
+    {{ interval$ | async }}
+    <br/>
+    <p>{{ addr | formatAddress: "para1" }}</p>
+    Full user list
+    <ul>
+        <li *ngFor="let user of user">{{ user.name }} - {{ user.age }}</li>
+    </ul>
+    Adult list
+    <ul>
+        <li *ngFor="let user of user | adult">{{ user.name }} - {{ user.age }}</li>
+    </ul>
 
-  <button (click)="addUser()">add user</button>
-  <hr />
-  <hr />
-  <!-- <app-tab-group [(activeIndex)]="currentIndex">
-  <app-tab-panel title="First tab">First tab content</app-tab-panel>
-  <app-tab-panel title="Second tab">Second tab content</app-tab-panel>
-  <app-tab-panel title="Third tab">Third tab content</app-tab-panel>
-  <app-tab-panel title="Fourth tab">Fourth tab content</app-tab-panel>
-</app-tab-group> -->
-  <button (click)="showTab4 = !showTab4" class="btn btn-primary">
-    toggle tab 4
-  </button>
-  <app-tab-bs-group [(activeIndex)]="currentIndex">
-    <app-tab-panel title="First tab">
-      <ng-template tabContent>
-        First tab content
-        <app-counter></app-counter>
-      </ng-template>
-    </app-tab-panel>
-    <app-tab-panel title="Second tab">
-      <ng-template tabContent>
-        Second tab content
-        <app-counter></app-counter>
-      </ng-template>
-    </app-tab-panel>
-    <app-tab-panel title="Third tab">
-      <ng-template tabContent>
-        Third tab content
-        <app-counter></app-counter>
-      </ng-template>
-    </app-tab-panel>
-    <app-tab-panel title="Fourth tab" *ngIf="showTab4">
-      Fourth tab content
-      <ng-template tabContent>
-        <app-counter></app-counter>
-      </ng-template>
-    </app-tab-panel>
-  </app-tab-bs-group>
-  <hr />
-  <hr />
-  <div class="card mx-4">
-    <div class="card-header">
-      <br />
-      you have selected
-      <ng-container [ngTemplateOutlet]="counterTmpl"></ng-container>.
+    <button (click)="addUser()">add user</button>
+    <hr/>
+    <hr/>
+    <!-- <app-tab-group [(activeIndex)]="currentIndex">
+    <app-tab-panel title="First tab">First tab content</app-tab-panel>
+    <app-tab-panel title="Second tab">Second tab content</app-tab-panel>
+    <app-tab-panel title="Third tab">Third tab content</app-tab-panel>
+    <app-tab-panel title="Fourth tab">Fourth tab content</app-tab-panel>
+  </app-tab-group> -->
+    <button (click)="showTab4 = !showTab4" class="btn btn-primary">
+        toggle tab 4
+    </button>
+    <app-tab-bs-group [(activeIndex)]="currentIndex">
+        <app-tab-panel title="First tab">
+            <ng-template tabContent>
+                First tab content
+                <app-counter></app-counter>
+            </ng-template>
+        </app-tab-panel>
+        <app-tab-panel title="Second tab">
+            <ng-template tabContent>
+                Second tab content
+                <app-counter></app-counter>
+            </ng-template>
+        </app-tab-panel>
+        <app-tab-panel title="Third tab">
+            <ng-template tabContent>
+                Third tab content
+                <app-counter></app-counter>
+            </ng-template>
+        </app-tab-panel>
+        <app-tab-panel *ngIf="showTab4" title="Fourth tab">
+            Fourth tab content
+            <ng-template tabContent>
+                <app-counter></app-counter>
+            </ng-template>
+        </app-tab-panel>
+    </app-tab-bs-group>
+    <hr/>
+    <hr/>
+    <div class="card mx-4">
+        <div class="card-header">
+            <br/>
+            you have selected
+            <ng-container [ngTemplateOutlet]="counterTmpl"></ng-container>
+            .
+        </div>
+        <div class="card-body">
+            There are
+            <ng-container [ngTemplateOutlet]="counterTmpl"></ng-container>
+            items. were
+            selected.
+        </div>
+        <div class="card-footer">
+            You have selected
+            <ng-container [ngTemplateOutlet]="counterTmpl"></ng-container>
+            items.
+        </div>
     </div>
-    <div class="card-body">
-      There are
-      <ng-container [ngTemplateOutlet]="counterTmpl"></ng-container> items. were
-      selected.
-    </div>
-    <div class="card-footer">
-      You have selected
-      <ng-container [ngTemplateOutlet]="counterTmpl"></ng-container> items.
-    </div>
-  </div>
-  <ng-template #counterTmpl>
-    <span class="badge badge-primary">{{ counter }}</span> items
-  </ng-template>
+    <ng-template #counterTmpl>
+        <span class="badge badge-primary">{{ counter }}</span> items
+    </ng-template>
 
-  <ng-template #linkTemplate let-l>
-    <!-- <ng-template #linkTemplate let-l="link"> -->
-    <h4>
-      {{ l }}
-    </h4>
-  </ng-template>
-  <app-tabs [navs]="navs" [linkTemplate]="linkTemplate"></app-tabs>
+    <ng-template #linkTemplate let-l>
+        <!-- <ng-template #linkTemplate let-l="link"> -->
+        <h4>
+            {{ l }}
+        </h4>
+    </ng-template>
+    <app-tabs [linkTemplate]="linkTemplate" [navs]="navs"></app-tabs>
 
-  <br />
-  <br />
-  <hr />
-  <app-hello></app-hello>
-  <button (click)="currentProgress = currentProgress + 1">increase</button>
-  <app-progress-bar></app-progress-bar>
-  <br />
-  <app-progress-bar
-    [progress]="currentProgress"
-    [backgroundColor]="'#9e9e9e'"
-    [progressColor]="'#2e8b57'"
-  >
-  </app-progress-bar>
-  <br />
-  <app-author-list></app-author-list>
-  <button (click)="showLast = !showLast">show last</button>
-  <!-- <app-toggle #toggleComp [(checked)]="isChecked"></app-toggle> -->
-  <app-toggle [(checked)]="isChecked"></app-toggle>
-  <ng-container *ngIf="showLast">
+    <br/>
+    <br/>
+    <hr/>
+    <app-hello></app-hello>
+    <button (click)="currentProgress = currentProgress + 1">increase</button>
+    <app-progress-bar></app-progress-bar>
+    <br/>
+    <app-progress-bar
+        [backgroundColor]="'#9e9e9e'"
+        [progressColor]="'#2e8b57'"
+        [progress]="currentProgress"
+    >
+    </app-progress-bar>
+    <br/>
+    <app-author-list></app-author-list>
+    <button (click)="showLast = !showLast">show last</button>
+    <!-- <app-toggle #toggleComp [(checked)]="isChecked"></app-toggle> -->
     <app-toggle [(checked)]="isChecked"></app-toggle>
-  </ng-container>
-  <br />
-  <!-- <button #toggleButton (click)="toggleComp.toggle()">toggle</button> -->
-  <input #nameInput type="text" />
-  <br />
-  <br />
-  <app-toggle [(checked)]="questions.question1">
-    <h3 class="header">Header 1</h3>
-    <label for="">Question 1</label>
-    <p>content 1</p>
-  </app-toggle>
-  <app-toggle [(checked)]="questions.question2">
-    <h3 class="header">Header 2</h3>
-    <span ngProjectAs="label" for="">Question 2</span>
-    <p>content 2</p>
-    <button>skip</button>
-  </app-toggle>
-  <br />
+    <ng-container *ngIf="showLast">
+        <app-toggle [(checked)]="isChecked"></app-toggle>
+    </ng-container>
+    <br/>
+    <!-- <button #toggleButton (click)="toggleComp.toggle()">toggle</button> -->
+    <input #nameInput type="text"/>
+    <br/>
+    <br/>
+    <app-toggle [(checked)]="questions.question1">
+        <h3 class="header">Header 1</h3>
+        <label for="">Question 1</label>
+        <p>content 1</p>
+    </app-toggle>
+    <app-toggle [(checked)]="questions.question2">
+        <h3 class="header">Header 2</h3>
+        <span for="" ngProjectAs="label">Question 2</span>
+        <p>content 2</p>
+        <button>skip</button>
+    </app-toggle>
+    <br/>
 </div>

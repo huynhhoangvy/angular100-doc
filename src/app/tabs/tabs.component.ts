@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, TemplateRef } from '@angular/core';
+import {Component, Input, OnInit, TemplateRef} from '@angular/core';
 
 @Component({
     selector: 'app-tabs',
@@ -8,7 +8,9 @@ import { Component, OnInit, Input, TemplateRef } from '@angular/core';
 export class TabsComponent implements OnInit {
     @Input() navs: string[];
     @Input() linkTemplate: TemplateRef<any>;
-    constructor() { }
+
+    constructor() {
+    }
 
     ngOnInit(): void {
     }

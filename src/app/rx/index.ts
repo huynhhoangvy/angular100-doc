@@ -1,5 +1,4 @@
-import { fromEvent, Observable, of, fromEventPattern, from, interval, timer, throwError, defer } from 'rxjs';
-import { throttleTime, map, catchError } from 'rxjs/operators';
+import {from, fromEvent, fromEventPattern, interval, of, throwError, timer} from 'rxjs';
 
 
 //////////////////////////////////////////
@@ -53,13 +52,13 @@ import { throttleTime, map, catchError } from 'rxjs/operators';
 
 ///////////////////////////////////////////
 const observer = {
-  next: val => console.log(val),
-  error: err => console.error(err),
-  complete: () => console.log('complete')
+    next: val => console.log(val),
+    error: err => console.error(err),
+    complete: () => console.log('complete')
 };
 
-// of 
-of(1, 2, 3, 4, 5, 'hello', [1, 2, 3], { foo: 'bar' }).subscribe(observer);
+// of
+of(1, 2, 3, 4, 5, 'hello', [1, 2, 3], {foo: 'bar'}).subscribe(observer);
 
 // from
 from(Promise.resolve('hello')).subscribe(observer);
@@ -69,12 +68,12 @@ fromEvent(document, 'click').subscribe(observer);
 
 // fromEventPattern
 fromEventPattern(
-  handler => {
-    document.addEventListener('click', handler);
-  },
-  handler => {
-    document.removeEventListener('click', handler);
-  }
+    handler => {
+        document.addEventListener('click', handler);
+    },
+    handler => {
+        document.removeEventListener('click', handler);
+    }
 ).subscribe(observer);
 
 // interval

@@ -1,19 +1,22 @@
 <header>
-    <ng-content select=".header"></ng-content>>
+    <ng-content select=".header"></ng-content>
+    >
 </header>
 <div
-class="toggle-wrapper"
-[class.checked]="checked"
-tabindex="0"
-(click)="toggle()"
+    (click)="toggle()"
+    [class.checked]="checked"
+    class="toggle-wrapper"
+    tabindex="0"
 >
-<div class="toggle"></div>
+    <div class="toggle"></div>
 </div>
 <div class="toggle-label">
-    <ng-content select="label, span"></ng-content>>
+    <ng-content select="label, span"></ng-content>
+    >
 </div>
 <div class="toggle-content">
-    <ng-content></ng-content>>
+    <ng-content></ng-content>
+    >
 </div>
 <div class="skip">
     <ng-content select="button"></ng-content>

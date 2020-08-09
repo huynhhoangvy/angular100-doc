@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
+import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
 
 @Component({
     selector: 'app-progress-bar',
@@ -6,6 +6,18 @@ import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/cor
     styleUrls: ['./progress-bar.component.scss']
 })
 export class ProgressBarComponent implements OnInit, OnChanges {
+    @Input() backgroundColor = '#ccc';
+    @Input() progressColor = 'tomato';
+
+    constructor() {
+    }
+
+    private _progress = 40;
+
+    get progress() {
+        return this._progress;
+    }
+
     @Input() set progress(val: number) {
         // validation value
         if (typeof val !== 'number') {
@@ -17,14 +29,6 @@ export class ProgressBarComponent implements OnInit, OnChanges {
             }
         }
     }
-    private _progress = 40;
-    get progress() {
-        return this._progress
-    }
-    @Input() backgroundColor = '#ccc';
-    @Input() progressColor = 'tomato';
-
-    constructor() { }
 
     ngOnChanges(changes: SimpleChanges) {
         // console.log({progress: this._progress});

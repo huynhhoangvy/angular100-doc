@@ -1,5 +1,5 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { Author } from './../authors';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Author} from './../authors';
 
 @Component({
     selector: 'app-author-details',
@@ -11,7 +11,8 @@ export class AuthorDetailsComponent implements OnInit {
     @Output() select = new EventEmitter<Author>();
     @Output() delete = new EventEmitter<number>();
 
-    constructor() { }
+    constructor() {
+    }
 
     ngOnInit(): void {
     }

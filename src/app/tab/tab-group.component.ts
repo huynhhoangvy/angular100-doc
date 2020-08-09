@@ -1,9 +1,9 @@
-import { Component, Input, Output, EventEmitter, ContentChildren, QueryList, AfterContentInit, forwardRef } from '@angular/core';
-import { TabPanelComponent } from './tab-panel.component';
+import {AfterContentInit, Component, ContentChildren, EventEmitter, forwardRef, Input, Output, QueryList} from '@angular/core';
+import {TabPanelComponent} from './tab-panel.component';
 
 @Component({
-  selector: 'app-tab-group',
-  template: `
+    selector: 'app-tab-group',
+    template: `
   <div class="tab-header">
     <div class="tab-header-item"
       *ngFor="let tab of tabPanelList; let idx = index"
@@ -23,7 +23,7 @@ import { TabPanelComponent } from './tab-panel.component';
     No more tabs.
   </ng-template>
   `,
-  styles: [`
+    styles: [`
     .tab-headers {
       display: flex;
       padding-bottom: .5rem;
@@ -41,33 +41,33 @@ import { TabPanelComponent } from './tab-panel.component';
   `]
 })
 export class TabGroupComponent implements AfterContentInit {
-  tabPanelList: TabPanelComponent[] = [];
-  @Input() activeIndex = 0;
-  @Output() activeIndexChange = new EventEmitter<number>();
+    tabPanelList: TabPanelComponent[] = [];
+    @Input() activeIndex = 0;
+    @Output() activeIndexChange = new EventEmitter<number>();
 
-  @ContentChildren(forwardRef(() => TabPanelComponent)) tabPanels: QueryList<TabPanelComponent>;
+    @ContentChildren(forwardRef(() => TabPanelComponent)) tabPanels: QueryList<TabPanelComponent>;
 
-  ngAfterContentInit() {
-    console.log({ tabPanel: this.tabPanels });
-    this.tabPanels.changes.subscribe(console.log);
-  }
-
-  addTab(tab: TabPanelComponent) {
-    this.tabPanelList = [...this.tabPanelList, tab];
-  }
-
-  removeTab(tab: TabPanelComponent) {
-    let found = -1;
-    this.tabPanelList = this.tabPanelList.filter((tp, index) => {
-      if (tp === tab) {
-        found = index;
-        return false;
-      }
-      return true;
-    });
-
-    if (found === this.activeIndex) {
-      this.activeIndexChange.emit(found === this.tabPanelList.length ? found - 1 : found);
+    ngAfterContentInit() {
+        console.log({tabPanel: this.tabPanels});
+        this.tabPanels.changes.subscribe(console.log);
     }
-  }
+
+    addTab(tab: TabPanelComponent) {
+        this.tabPanelList = [...this.tabPanelList, tab];
+    }
+
+    removeTab(tab: TabPanelComponent) {
+        let found = -1;
+        this.tabPanelList = this.tabPanelList.filter((tp, index) => {
+            if (tp === tab) {
+                found = index;
+                return false;
+            }
+            return true;
+        });
+
+        if (found === this.activeIndex) {
+            this.activeIndexChange.emit(found === this.tabPanelList.length ? found - 1 : found);
+        }
+    }
 }

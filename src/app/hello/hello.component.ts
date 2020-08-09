@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 
 @Component({
     selector: 'app-hello',
@@ -47,13 +47,14 @@ export class HelloComponent implements OnInit {
         display: 'flex',
         'align-items': 'center',
         'justify-content': 'center'
+    };
+
+    constructor() {
     }
 
     handleClick() {
         alert('okay');
     }
-
-    constructor() { }
 
     ngOnInit(): void {
     }

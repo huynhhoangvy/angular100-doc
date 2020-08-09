@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 
 @Component({
     selector: 'app-toggle',
@@ -15,7 +15,8 @@ export class ToggleComponent implements OnInit {
     // @Input() canSkip: boolean;
     // @Output() skip = new EventEmitter();
 
-    constructor() { }
+    constructor() {
+    }
 
     ngOnInit(): void {
     }

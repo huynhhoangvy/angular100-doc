@@ -1,19 +1,19 @@
 <div>Name: {{ user.name }}, age: {{ user.age }}</div>
 <div *ngIf="user.age >= 13; else noKid">
-	Not a teenager
+    Not a teenager
 </div>
 <ng-template #noKid>
-	<div>
-		KIDDO
-	</div>
+    <div>
+        KIDDO
+    </div>
 </ng-template>
 <div>
-	<button (click)="handleClick()">test</button>
+    <button (click)="handleClick()">test</button>
 </div>
-<input type="text" [value]="user.name" />
-<input type="text" [(ngModel)]="user.name" />
+<input [value]="user.name" type="text"/>
+<input [(ngModel)]="user.name" type="text"/>
 <div *ngFor="let author of authors; index as idx">
-	{{ idx }} - {{ author.firstName }} {{ author.lastName }}
+    {{ idx }} - {{ author.firstName }} {{ author.lastName }}
 </div>
 <div [style]="objectStyle">
     <span [class.active]="number > 15" [style.background]="'gray'">test text</span>
