@@ -936,3 +936,245 @@ Like `fromtEvent()`, `interval()`does not implicitly implement `complete`, this 
   Get lazy evaluate, run whenever `.subscribe`, `of` runs and create new `Observable`, `Math.random` runs and create new value
   `defer()` (combine with `retry`) will be the solution when we need to `retry` an `Observable` which need to compare with a random value
 
+## Day #21 RX TRANSFORMATION
+
+Creator operators can be called as normal function. `Pipeable` operators will be called inside `pipe()` method of an `Observable` instance.
+-   `Pipeable` operators:
+    -   Pure functions that receive an `Observable` and return another `Observable`.
+    -   Incoming `Observable` will not be mutated.
+    -   Syntax: 
+    
+    ```typescript
+    observableInstance.pipe(
+        operator1(),
+        operator2()
+    )
+    ```
+    
+    -   `observableInstance` will always return another `Observable` regardless the number of executed `pipeable` operator. Hence, reassign or resubscribe is needed:
+    
+    ```typescript
+    const returnedObservable = observableInstance.pipe(
+        operator1(),
+        operator2(),
+    )   
+    ``` 
+    
+    -   `Transformation` operator is one category of `Pipeable` operators.
+    
+-   `Transformation` operators
+    -   The same as JS `map`, `filter`
+
+    ```typescript
+    import { Observable } from 'rxjs'; 
+
+    interface User {
+        id: string;
+        username: string;
+        firstname: string;
+        lastname: string;
+    }
+
+    const source = new Observable<User>((observer) => {
+        const users = [
+            {id: 'ddfe3653-1569-4f2f-b57f-bf9bae542662', username: 'tiepphan', firstname: 'tiep', lastname: 'phan'},
+            {id: '34784716-019b-4868-86cd-02287e49c2d3', username: 'nartc', firstname: 'chau', lastname: 'tran'},
+        ];
+
+    setTimeout(() => {
+        observer.next(users[0]);
+    }, 1000);
+    setTimeout(() => {
+        observer.next(users[1]);
+        observer.complete();
+    }, 3000);
+    });
+
+    const observer = {
+        next: value => console.log(value),
+        error: err => console.error(err),
+        complete: () => console.log('completed'),
+    };
+    source.subscribe(observer);
+    ```
+
+    -   `map`
+    
+    `map<T, R>(project: (value: T, index: number) => R, thisArg?: any): OperatorFunction<T, R>`
+     
+    -   To display user's full name inside `next`, we can `transform` data along the way.
+    -   Always receive outer/parent `observable` or the previous `observable`
+    -   Will not loop through every item of a list (use `from` instead of  `of` to do so)
+    
+    ```typescript
+    import { map } from 'rxjs/operator';
+    
+    source.pipe(
+        map(user => {
+            return {
+            ...user,
+            fullName: `${user.firstname} ${user.lastname}`
+            };
+        })
+    ).subscribe(observer);
+    ```
+    
+    -   Or, to return user's id upon emitting.
+    
+    ```typescript
+        source.pipe(
+            map(user => user.id)
+        ).subscribe(observer);
+    ```
+    
+    -   `pluck`
+    
+    `pluck<T, R>(...properties: string[]): OperatorFunction<T, R>`
+    
+    -   pluck an attribute from the received data (key from object, item index from array, nested object)
+    
+    -   `mapTo`
+    
+    `mapTo<T, R>(value: R): OperatorFuntion<T, R>`
+    
+    -   use `mapTo` to implement mouse hover event, return `true` on `mouseover`, return `false` on `mouseleave`.
+    
+    ```typescript
+    const element = document.querySelector('#hover');
+    
+    const mouseover$ = fromEvent(element, 'mouseover');
+    const mouseleave$ = fromEvent(element, 'mouseleave');
+    
+    const hover$ = merge(
+        mouseover$.pipe(
+            mapTo(true),
+        ),
+        mouseleave$.pipe(
+            mapTo(false),
+        )
+    );
+    
+    hover$.subscribe(observer);
+    ```
+    
+    -   `scan`
+    
+    `scan<T, R>(accumulator: (acc: R, value: T, index: number) => R, seed?: T | R): OperatorFunction<T, R>`
+    
+    ```typescript
+    const button = document.querySelector('#add');
+    
+    const click$ = fromEvent(button, 'click');
+    
+    click$.pipe(
+        scan((acc, curr) => acc + 1, 0)
+    ).subscribe(observer);
+    ```
+    
+    ```typescript
+    const users$ = new Observable<User>((observer) => {    
+        const users = [
+            {id: 'ddfe3653-1569-4f2f-b57f-bf9bae542662', username: 'tiepphan', firstname: 'tiep', lastname: 'phan', postCount: 5},
+            {id: '34784716-019b-4868-86cd-02287e49c2d3', username: 'nartc', firstname: 'chau', lastname: 'tran', postCount: 22},
+        ];
+    
+        setTimeout(() => {
+            observer.next(users[0]);
+        }, 1000);
+        setTimeout(() => {
+            observer.next(users[1]);
+            observer.complete();
+            }, 3000);
+        });
+    
+    users$.pipe(
+        scan((acc, curr) => acc + curr.postCount, 0)
+    ).subscribe(observer);
+    ```
+    
+    -   `reduce`
+    
+    `reduce<T, R>(accumulator: (acc: T | R, value: T, index?: number) => T | R, seed?: T | R): OperatorFunction<T, T | R>`
+    
+    `reduce` will reduce the value overtime, but it will wait until source completes then emit the value
+    -   reduce only run whenever the `observale` completes, won't run with interval (`observable` does not complete)
+    
+    ```typescript
+    users$.pipe(
+        reduce((acc, curr) => acc + curr.postCount, 0)
+    ).subscribe(observer);
+    ```
+
+    -   `toArray`
+    
+    `toArray<T>(): OperatorFunction<T, T[]>`
+    
+    `toArray` collects emitted values from the stream to combine an array then emits the array when the stream complete.
+    
+    ```typescript
+    users$.pipe(
+        reduce((acc, curr) => [...acc, curr], [])
+    ).subscribe(observer);
+    ```
+    
+    ```typescript
+    users$.pipe(
+        toArray()
+    ).subscribe(observer);
+    ```
+    
+    -   `buffer`
+    
+    `buffer<T>(closingNotifier: Observable<any>): OperatorFunction<T, T[]>`
+    
+    `buffer` saves emitted values and wait until `closingNotifier` to emit the values as an arrray
+
+    -   `buffer` only run under condition (not really sure about the words)
+    -   `observable` will still run under the hood, whenever `buffer` run, it emits all values accumulated before
+
+    ```typescript
+    const interval$ = interval(1000);
+    
+    const click$ = fromEvent(document, 'click');
+    
+    const buffer$ = interval$.pipe(
+        buffer(click$)
+    );
+    
+    
+    const subscribe = buffer$.subscribe(
+        val => console.log('Buffered Values: ', val)
+    );
+    
+    // output có dạng
+    "Buffered Values: "
+    [0, 1]
+    "Buffered Values: "
+    [2, 3, 4, 5, 6]
+    ```
+    
+    -   `bufferTime`
+    
+    `bufferTime<T>(bufferTimeSpan: number): OperatorFunction<T, T[]>`
+    
+    Work the same as `buffer`, but emit value every `bufferTimeSpan` ms
+    
+    ```typescript
+    const source = interval(500);
+    
+    const bufferTime = source.pipe(
+        bufferTime(2000)
+    );
+    
+    const bufferTimeSub = bufferTime.subscribe(
+        val => console.log('Buffered with Time:', val)
+    );
+    // output
+    "Buffered with Time:"
+    [0, 1]
+    "Buffered with Time:"
+    [2, 3]
+    "Buffered with Time:"
+    [4, 5]
+    ...
+    ```
