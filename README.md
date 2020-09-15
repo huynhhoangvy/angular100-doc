@@ -407,7 +407,8 @@ export class BsTabGroupComponent extends TabGroupComponent {}
 
 - `@ViewChildren`: your own child; `@ContentChildren`: someone's else child
 
-- `View`: template that component directly interact with (crud). It is everything inside `templateUrl` or `template` of `@Component`, except for `ng-content`. A component's view is a black box for other components (shadow DOM)
+- `View`: template that component directly interact with (crud). It is everything inside `templateUrl` or `template` of `@Component`, 
+except for `ng-content`. A component's view is a black box for other components (shadow DOM)
 
 - `Content`: template that is projected inside component/directive tag (light DOM)
 
@@ -821,7 +822,8 @@ export class AdultPipe implements PipeTransform {
 
 `fromEventPattern()`receives 3 parameters: add..., remove... and `projectFunc`(optional)
 `fromEventPattern()` provides API to transform event from original API of the event
-`addEventListener`and `removeEventListener`APIs are used directly from the DOM to transform into `Observable`. `fromtEventPattern()`can be used to transform more complicated API into `Observable`, such as `SignalR Hub`
+`addEventListener`and `removeEventListener`APIs are used directly from the DOM to transform into `Observable`. 
+`fromtEventPattern()`can be used to transform more complicated API into `Observable`, such as `SignalR Hub`
 
   ```typescript
 // _getHub() là hàm trả về Hub.
@@ -883,7 +885,8 @@ Like `fromtEvent()`, `interval()`does not implicitly implement `complete`, this 
 - `timer()`
 `timer()`can be used in 2 ways:
   - `timer(timeInterval)` create `Observable` which emits value after a period time. This will auto implement `complete`
-  - `timer(timeInterval, periodInterval)` create `Observable` which emits value after a period time and emits value after each cycle/run. This way of use is similar to `interval()`, however, `timer()` supports delaying before `emit`. This will not auto `complete`
+  - `timer(timeInterval, periodInterval)` create `Observable` which emits value after a period time and emits value after each cycle/run. 
+  This way of use is similar to `interval()`, however, `timer()` supports delaying before `emit`. This will not auto `complete`
 
   ```typescript
   // output: after 1 sec → 0
@@ -902,7 +905,8 @@ Like `fromtEvent()`, `interval()`does not implicitly implement `complete`, this 
   ```
 
   `throwError()` is commonly used in error handling of an `Observable`, after handling the error, we want to throw error to the next `ErrorHandler`
-  When working with `Observable`, there will be `operators`which requires you to provide an `Observable` (`switchMap`, `catchError`), using `throwError`will be a wise choice
+  When working with `Observable`, there will be `operators`which requires you to provide an `Observable` (`switchMap`, `catchError`), 
+  using `throwError`will be a wise choice
 
 - `defer()`
   `defer()` receives an `Observablefactory`and returns this `Observable`. `defer()` will use this `ObservableFactory` to create a new `Observable` for each `subscriber`
@@ -951,7 +955,8 @@ Creator operators can be called as normal function. `Pipeable` operators will be
     )
     ```
     
-    -   `observableInstance` will always return another `Observable` regardless the number of executed `pipeable` operator. Hence, reassign or resubscribe is needed:
+    -   `observableInstance` will always return another `Observable` regardless the number of executed `pipeable` operator. 
+    Hence, reassign or resubscribe is needed:
     
     ```typescript
     const returnedObservable = observableInstance.pipe(
@@ -1029,152 +1034,472 @@ Creator operators can be called as normal function. `Pipeable` operators will be
     
     -   `pluck`
     
-    `pluck<T, R>(...properties: string[]): OperatorFunction<T, R>`
+        -    `pluck<T, R>(...properties: string[]): OperatorFunction<T, R>`
     
-    -   pluck an attribute from the received data (key from object, item index from array, nested object)
+        -   pluck an attribute from the received data (key from object, item index from array, nested object)
     
     -   `mapTo`
     
-    `mapTo<T, R>(value: R): OperatorFuntion<T, R>`
+        -   `mapTo<T, R>(value: R): OperatorFuntion<T, R>`
     
-    -   use `mapTo` to implement mouse hover event, return `true` on `mouseover`, return `false` on `mouseleave`.
+        -   use `mapTo` to implement mouse hover event, return `true` on `mouseover`, return `false` on `mouseleave`.
     
-    ```typescript
-    const element = document.querySelector('#hover');
+        ```typescript
+        const element = document.querySelector('#hover');
     
-    const mouseover$ = fromEvent(element, 'mouseover');
-    const mouseleave$ = fromEvent(element, 'mouseleave');
+        const mouseover$ = fromEvent(element, 'mouseover');
+        const mouseleave$ = fromEvent(element, 'mouseleave');
     
-    const hover$ = merge(
-        mouseover$.pipe(
-            mapTo(true),
-        ),
-        mouseleave$.pipe(
-            mapTo(false),
-        )
-    );
+        const hover$ = merge(
+            mouseover$.pipe(
+                mapTo(true),
+            ),
+            mouseleave$.pipe(
+                mapTo(false),
+            )
+        );
     
-    hover$.subscribe(observer);
-    ```
+        hover$.subscribe(observer);
+        ```
     
     -   `scan`
     
-    `scan<T, R>(accumulator: (acc: R, value: T, index: number) => R, seed?: T | R): OperatorFunction<T, R>`
+        -   `scan<T, R>(accumulator: (acc: R, value: T, index: number) => R, seed?: T | R): OperatorFunction<T, R>`
     
-    ```typescript
-    const button = document.querySelector('#add');
+        ```typescript
+        const button = document.querySelector('#add');
     
-    const click$ = fromEvent(button, 'click');
+        const click$ = fromEvent(button, 'click');
     
-    click$.pipe(
-        scan((acc, curr) => acc + 1, 0)
-    ).subscribe(observer);
-    ```
+        click$.pipe(
+            scan((acc, curr) => acc + 1, 0)
+        ).subscribe(observer);
+        ```
     
-    ```typescript
-    const users$ = new Observable<User>((observer) => {    
-        const users = [
-            {id: 'ddfe3653-1569-4f2f-b57f-bf9bae542662', username: 'tiepphan', firstname: 'tiep', lastname: 'phan', postCount: 5},
-            {id: '34784716-019b-4868-86cd-02287e49c2d3', username: 'nartc', firstname: 'chau', lastname: 'tran', postCount: 22},
-        ];
+        ```typescript
+        const users$ = new Observable<User>((observer) => {    
+            const users = [
+                {id: 'ddfe3653-1569-4f2f-b57f-bf9bae542662', username: 'tiepphan', firstname: 'tiep', lastname: 'phan', postCount: 5},
+             {id: '34784716-019b-4868-86cd-02287e49c2d3', username: 'nartc', firstname: 'chau', lastname: 'tran', postCount: 22},
+            ];
     
-        setTimeout(() => {
-            observer.next(users[0]);
-        }, 1000);
-        setTimeout(() => {
-            observer.next(users[1]);
-            observer.complete();
+            setTimeout(() => {
+                observer.next(users[0]);
+            }, 1000);
+            setTimeout(() => {
+                observer.next(users[1]);
+                observer.complete();
             }, 3000);
-        });
+            });
     
-    users$.pipe(
-        scan((acc, curr) => acc + curr.postCount, 0)
-    ).subscribe(observer);
-    ```
+        users$.pipe(
+            scan((acc, curr) => acc + curr.postCount, 0)
+        ).subscribe(observer);
+        ```
     
     -   `reduce`
     
-    `reduce<T, R>(accumulator: (acc: T | R, value: T, index?: number) => T | R, seed?: T | R): OperatorFunction<T, T | R>`
+        -    `reduce<T, R>(accumulator: (acc: T | R, value: T, index?: number) => T | R, seed?: T | R): OperatorFunction<T, T | R>`
+        -   `reduce` will reduce the value overtime, but it will wait until source completes then emit the value
+        -   reduce only run whenever the `observale` completes, won't run with interval (`observable` does not complete)
     
-    `reduce` will reduce the value overtime, but it will wait until source completes then emit the value
-    -   reduce only run whenever the `observale` completes, won't run with interval (`observable` does not complete)
-    
-    ```typescript
-    users$.pipe(
-        reduce((acc, curr) => acc + curr.postCount, 0)
-    ).subscribe(observer);
-    ```
+        ```typescript
+        users$.pipe(
+            reduce((acc, curr) => acc + curr.postCount, 0)
+        ).subscribe(observer);
+        ```
 
     -   `toArray`
+        -   `toArray<T>(): OperatorFunction<T, T[]>`
+        -   `toArray` collects emitted values from the stream to combine an array then emits the array when the stream complete.
     
-    `toArray<T>(): OperatorFunction<T, T[]>`
+        ```typescript
+        users$.pipe(
+            reduce((acc, curr) => [...acc, curr], [])
+        ).subscribe(observer);
+        ```
     
-    `toArray` collects emitted values from the stream to combine an array then emits the array when the stream complete.
-    
-    ```typescript
-    users$.pipe(
-        reduce((acc, curr) => [...acc, curr], [])
-    ).subscribe(observer);
-    ```
-    
-    ```typescript
-    users$.pipe(
-        toArray()
-    ).subscribe(observer);
-    ```
+        ```typescript
+        users$.pipe(
+            toArray()
+        ).subscribe(observer);
+        ```
     
     -   `buffer`
     
-    `buffer<T>(closingNotifier: Observable<any>): OperatorFunction<T, T[]>`
-    
-    `buffer` saves emitted values and wait until `closingNotifier` to emit the values as an arrray
+        -   `buffer<T>(closingNotifier: Observable<any>): OperatorFunction<T, T[]>`
+        -   `buffer` saves emitted values and wait until `closingNotifier` to emit the values as an arrray
+        -   `buffer` only run under condition (not really sure about the words)
+        -   `observable` will still run under the hood, whenever `buffer` run, it emits all values accumulated before
 
-    -   `buffer` only run under condition (not really sure about the words)
-    -   `observable` will still run under the hood, whenever `buffer` run, it emits all values accumulated before
-
-    ```typescript
-    const interval$ = interval(1000);
+        ```typescript
+        const interval$ = interval(1000);
     
-    const click$ = fromEvent(document, 'click');
+        const click$ = fromEvent(document, 'click');
     
-    const buffer$ = interval$.pipe(
-        buffer(click$)
-    );
+        const buffer$ = interval$.pipe(
+            buffer(click$)
+        );
     
     
-    const subscribe = buffer$.subscribe(
-        val => console.log('Buffered Values: ', val)
-    );
+        const subscribe = buffer$.subscribe(
+            val => console.log('Buffered Values: ', val)
+        );
     
-    // output có dạng
-    "Buffered Values: "
-    [0, 1]
-    "Buffered Values: "
-    [2, 3, 4, 5, 6]
-    ```
+        // output có dạng
+        "Buffered Values: "
+        [0, 1]
+        "Buffered Values: "
+        [2, 3, 4, 5, 6]
+        ```
     
     -   `bufferTime`
     
-    `bufferTime<T>(bufferTimeSpan: number): OperatorFunction<T, T[]>`
+        -   `bufferTime<T>(bufferTimeSpan: number): OperatorFunction<T, T[]>`
     
-    Work the same as `buffer`, but emit value every `bufferTimeSpan` ms
+        -   Work the same as `buffer`, but emit value every `bufferTimeSpan` ms
+    
+        ```typescript
+        const source = interval(500);
+
+        const bufferTime = source.pipe(
+            bufferTime(2000)
+        );
+
+        const bufferTimeSub = bufferTime.subscribe(
+            val => console.log('Buffered with Time:', val)
+        );
+        // output
+        "Buffered with Time:"
+        [0, 1]
+        "Buffered with Time:"
+        [2, 3]
+        "Buffered with Time:"
+        [4, 5]
+        ...
+        ```
+## Day #22 RXJS Filtering Operators
+
+-   `filter()`
+
+    -   `filter<T>(predicate: (value: T, index: number) => boolean, thisArg?: any) : MonoTypeOperationFunction<T>`
+    -   `filter()` takes a function `predicate` which returns `truthy` or `falsy` value. `filter()` will emit the value 
+    of the `Observable` at that time, depending on the `truthy/falsy` value.
     
     ```typescript
-    const source = interval(500);
-    
-    const bufferTime = source.pipe(
-        bufferTime(2000)
-    );
-    
-    const bufferTimeSub = bufferTime.subscribe(
-        val => console.log('Buffered with Time:', val)
-    );
-    // output
-    "Buffered with Time:"
-    [0, 1]
-    "Buffered with Time:"
-    [2, 3]
-    "Buffered with Time:"
-    [4, 5]
-    ...
+    from([1, 2, 3, 4, 5, 6])
+        .pipe(
+            filter(x => x % 2 === 0)
+        )
+        .subscribe(console.log); // output: 2, 4, 6
     ```
+    
+-   `first()`
+
+    -   `first<T, D>(predicate?: (value: T, index: number, source: Observable<T>) => boolean, defaultValue?: D): OperatorFunction<T, T | D>`
+    -   `first()` emits the first value of the `Observable`, then `complete`. `first()` will throw `EmptyError` 
+    if the `Observable` `complete` before emitting any value (empty `Observable`, or creator operation which take no value)
+    
+    ```typescript
+    from([1, 2, 3, 4, 5, 6])
+        .pipe(
+            first()
+        )
+        .subscribe(console.log, null, () => console.log('complete')); // output: 1 -> complete
+    
+    of() // empty observable
+    .pipe(
+        first()
+    )
+    .subscribe(console.log) // output: Error: EmptyError
+    ```
+    
+    -   `first()` can take 2 optional parameters: `predicate` and `defaultValue`. `first()` will throw `Error` 
+    if the `Observable` complete without having any value satisfy the condition from the `predicate`
+    -   `first()` will not emit `Error` when we pass both `predicate` and `defaultValue`
+    
+    ```typescript
+    from([1, 2, 3, 4, 5, 6])
+        .pipe(
+            first(x => x > 3)
+        )
+        .subscribe(console.log, null, () => console.log('complete')); // output: 4 -> complete
+    
+    from([1, 2, 3, 4, 5, 6])
+        .pipe(
+            first(x => x > 6) // without default value
+        )
+        .subscribe(null, console.log, null) // Error: Error
+    
+    from([1, 2, 3, 4, 5, 6])
+        .pipe(
+            first(x => x > 6),
+        'default value'
+    )   // with default value
+    .subscribe(null, console.log, () => console.log('complete'));   // output: 'defaultValue' -> complete
+    ```
+    
+-   `last()`
+    
+    -   `last<T, D>(predicate?: (value: T, index: number, source: Observable<T>) => boolean, defaultValue?: D): OperatorFunction<T, T | D>`
+    -   `last()` emits the last value of the `Observable` before it `complete`. `last()` has all the behaviors like `first()` does:
+        -   Throw `EmptyError` if `Observable` `complete` before emitting any value
+        -   Have 2 optional parameter: `predicate` and `defaultValue`
+        -   Throw `Error` if the condition is not be satisfied
+        -   Emit `defaultValue` when `predicate` and `defaultValue` are defined but no value satisfy the condition
+        
+-   `find()`
+
+    -   `find<T>(predicate: (value: T, index: number, source: Observable<T>) => boolean, thisArg?: any): OperatorFunction<T, T | undefined>`
+    -   `find()` emit the first value satisfying the condition from the `predicate`, then `complete`
+    -   `find()` must have `predicate` and will not emit `Error` when the condition is not be satisfied
+    
+    ```typescript
+    from([1, 2, 3, 4, 5, 6])
+      .pipe(
+        find((x) => x % 2 === 0) // số chẵn
+      )
+      .subscribe(console.log, null, () => console.log('complete')); // output: 2 -> complete
+    ```
+    
+-   `single()`
+
+    -   `single<T>(predicate?: (value: T, index: number, source: Observable<T>) => boolean): MonoTypeOperatorFunction<T>`
+    -   Work like `first()`, but `single()` will throw `Error` when there is MORE THAN ONE value satisfy the condition
+    -   `single()` does not have `defaultValue` and will emit `undefined` when the condition is not be satisfied
+    -   Often used when `predicate` has a condition need to be satisfied
+    -   `single()` throws `Error` when the `Observable` emits more than 1 value
+    
+    ```typescript
+    from([1, 2, 3, 4, 5, 6]).pipe(single()).subscribe(null, console.log,null); // error: Error -> more than 1 value is emitted from from() and single()
+    
+    from([1, 2, 3])
+        .pipe(single(x => x === 2))
+        .subscribe(console.log, null, () => console.log('complete')); // output: 2 -> complete
+    
+    from([1, 2, 3])
+        .pipe(single(x => x > 1))
+        .subscribe(null, console.log, null); // error: Error -> more than 1 value > 1
+    ```
+
+-   `take()`
+
+    -   `take<T>(count: number): MonoTypeOperationFunciton<T>`
+    -   `take()` takes a parameter `count` to count the number of values got from the `observable`, then `complete`
+    
+    ```typescript
+    from([1, 2, 3])
+        .pipe(take(2))
+        .subscribe(console.log, null, () => console.log('complete')); // output: 1, 2 -> complete
+    ```
+    
+    -   special case: `take(1)`
+    -   `take(1)` vs `first()`: `take(1)` will not throw any `error` when the `observable` `complete` without emitting any value
+    -   When to use `take(1)`:
+    
+        -   notify where user click when they first go to the page
+        -   get snapshot of data at a time
+        -   Route Guard which return `Observable`
+        
+-   `takeLast()`
+
+    -   `takeLast<T>(count: number): MonoTypeOperationFunction<T>`
+    -   `takeLast()` will get the last `n` values emitted from the `observable`
+    -   `takeLast()` emits only when `Observable` completes
+    
+    ```typescript
+    from([1, 2, 3, 4])
+        .pipe(takeLast(2))
+        .subscribe(console.log, null, () => console.log('complete')); // output: 3, 4 -> complete
+    ```
+
+-   `takeUntil()`
+
+    -   `takeUntil<T>(notifier: Observable<any>): MonoTypeOperationFunction<T>`
+    -   `takeUntil()` take an `Observable` as the parameter to work as a `notifier` and will emit the value of the `Observable`
+     until `notifier` emits
+    
+    ```typescript
+    interval(1000)
+        .pipe(takeUntil(fromEvent(document, 'click')))
+        .subscribe(console.log, null, () => console.log('complete')); // output: 0, 1, 2, 3, 4 -- click --> 'complete'
+    ```
+    
+    -   Use case in Angular:
+        -   `takeUntil()` is used to unsubscribe `Observable` in `ngOnDestroy`
+        -   Các bạn suy nghĩ mình có 1 destroySubject: Subject<void> tượng trưng cho notifier. 
+        Khi ngOnDestroy() thực thi, chúng ta sẽ cho destroySubject.next() (emit) và sử dụng takeUntil(this.destroySubject)
+         thì Observable trong Component sẽ được unsubscribe khi ngOnDestroy() thực thi -> khi Component unmount.
+
+-   `takeWhile()`
+
+    -   `takeWhile<T>(predicate: (value: T, index: number) => boolean, inclusive: boolean = false): MonoTypeOperatorFunction<T>`
+    -   `takeWhile()` takes a parameter `predicate`
+    
+    ```typescript
+    interval(1000)
+        .pipe(takeWhile(x => x < 6))
+        .subscribe(console.log, null, () => console.log('complete')); // output: 0, 1, 2, 3, 4, 5 -> complete
+    ```
+    
+    -   Use `takeWhile()` to `unsubscribe` from the value `Observable` emits
+    -   Use `takeUntil()` when there is an external `notifier`
+    
+-   `skip()`
+
+    -   `skip<T>(count: number): MonoTypeOperationFunction<T>`
+    -   `skip()` is opposite to `take()`, `skip()` will skip the first `n` value
+    
+    ```typescript
+    from([1, 2, 3])
+        .pipe(skip(1))
+        .subscribe(console.log, null, () => console.log('complete')); // output: 2, 3, 4 -> complete
+    ```
+    
+-   `skipUntil()`
+
+    -   `skipUntil<T>(notifier: Observable<any>): MonoTypeOperationFunction<T>`
+    -   Similar to `skip()` and `takeUntil()`
+    
+    ```typescript
+    interval(1000)
+        .pipe(skipUntil(fromEvent(document, 'click')))
+        .subscribe(console.log) // output: click at 5 second -> 5, 6, 7, 8 ...
+    ```
+    
+-   `skipWhile()`
+
+    -   `skipWhile<T>(predicate: (value: T, index: number) => boolean): MonoTypeOperationFunction<T>`
+    -   Similar to `takeWhile()` and `skip()`
+    
+    ```typescript
+    interval(1000)
+        .pipe(skipWhile(x => x < 5))
+        .subscribe(console.log) // output: 6, 7, 8 ...
+    ```
+    
+-   `distinct()`
+
+    -   `distinct<T, K>(keySelector?: (value: T) => K, flushes?: Observable<any>): MonoTypeOperationFunction<T>`
+    -   `distinct()` compares emitted values from `Observable` and will only emit new value (not yet been emitted)
+    
+    ```typescript
+    from([1, 2, 3, 4, 5, 6, 1])
+        .pipe(distinct())
+        .subscribe(console.log, null, () => console.log('complete')); // output: 1, 2, 3, 4, 5, 6 -> complete
+    ```
+    
+    -   `distinct()` has an optional parameter `keySelector` function to decide which property need to be compared when `Observable`
+        emits a complex `Object`
+        
+    ```typescript
+    of({age: 4, name: 'Foo'}, {age: 7, name: 'Bar'}, {age: 5, name: 'Foo'})
+        .pipe(distinct(p => p.name))
+        .subscribe(console.log, null, () => console.log('complete')); // output: {age: 4, name: 'Foo'}, {age: 7, name: 'Bar'} -> complete
+    ```
+    
+-   `distinctUnchanged()`
+
+    -   `distinctUnchange<T, K>(compare?: (x: K, y: K) => boolean, keySelector?: (x: T) => K): MonoTypeOperation Function<T>`
+    -   Similar to `distinct()`, `distinctUnchange()` compare value which is going to be emitted with the last emitted value from the `Observable`
+    
+    ```typescript
+    from([1, 1, 2, 2, 2, 1, 1, 2, 3, 3, 4])
+        .pipe(distinctUntilChanged())
+        .subscribe(console.log, null, () => console.log('complete')); // output: 1, 2, 1, 2, 3, 4 -> complete
+    ```
+    
+    -   `distiinctUnchange()` has 2 optional paramters `compare` and `keySelector` function
+    -   Without `compare`, `distinctUnchange()` uses `===` operator to compare, or `distinctUnchange()` will skip the value when `compare` function return `true`
+    
+    ```typescript
+    of(
+        {age: 4, name: 'Foo'},
+        {age: 6, name: 'Foo'},
+        {age: 7, name: 'Bar'},
+        {age: 5, name: 'Foo'},
+    )
+        .pipe(distinctUnchanged((a, b) => a.name === b.name))
+        .subscribe(console.log, null, () => console.log('complete')); // output: {age: 4, name: 'Foo'}, {age: 7, name: 'Bar'}, {age: 5, name: 'Foo'} -> complete
+    ```
+
+-   `distinctUntilKeyChanged()`
+
+    -   `distinctUntilKeyUnchanged<T, K extends keyof T>(key: K, compare?: (x: T[K], y: T[K] => boolean): MonoTypeOperationFunction<T>`
+    -   `distinctUntilKeyChanged()` = `distinctUntilChanged()` + `keySelector`
+    
+    ```typescript
+    of(
+        {age: 4, name: 'Foo'},
+        {age: 6, name: 'Foo'},
+        {age: 7, name: 'Bar'},
+        {age: 5, name: 'Foo'}, 
+    )
+        .pipe(distinctUntilKeyChanged('name'))
+        .subscribe(console.log, null, () => console.log('complete')); // output: {age: 4, name: 'Foo'}, {age: 7, name: 'Bar'}, {age: 5, name: 'Foo'} -> complete
+    ```
+
+-   `throttle()/throttleTime()`
+
+    -   `throttle<T>(durationSelector: (value: T) => SubscribableOrPromise<any>, config: ThrottleConfig = defaultThrottleConfig): MonoTypeOperatorFunction<T>`
+    -   `throttleTime<T>(duration: number, scheduler: SchedulerLike = async, config: ThrottleConfig = defaultThrottleConfig): MonoTypeOperatorFunction<T>`
+
+    -   `throttleTime()` take a parameter `duration` (millisecond). When `Observable` emit the first value, `throttleTime()` will emit this value, then run timer with the `duration`.
+        When the timer is running, all values emitted from the `Observable` are skipped. When the timer is over, `throttleTime()` wait for the next value from the `Observable`
+        
+    -   `throttle()` is similar to `throttleTime()`; however, `throttle()` takes an `Observable` as `durationSelector`. When the `durationSelector` emits value or `complete`, the timer will stop,
+        then `throttle()` wait for the next value emitted from the `Observable`
+
+    ```typescript
+    fromEvent(document, 'mousemove')
+        .pipe(throttleTime(1000))
+        .subscribe(console.log, null, () => console.log('complete')); // output: MouseEvent {} - wait 1s -> MouseEvent { } - wait 1s -> MouseEvent { }
+    ```
+    
+    -   `throttleTime()` can take a parameter `throttleConfig: {leading: boolean, trailing: boolean}` to decide whether 
+        `throttleTime()` should emit the first or the last value when the `timer` is over. Default: `{leading: true, trailing: false}`
+
+    -   `throttleTime()` is used to handle DOM `event` (`mousemove`) without emitting too many `event`
+
+-   `debounce()/debounceTime()`
+
+    -   `debounce<T>(durationSelector: (value: T) => SubscribableOrPromise<any>): MonoTypeOperatorFunction<T>`
+    -   `debounceTime<T>(dueTime: number, scheduler: SchedulerLike = async): MonoTypeOperatorFunction<T>`
+    -   `debounceTime()` takes a parameter `dueTime`. `debounceTime()` will skip value emitting from the `Observable`
+        and will run the `timer` with `dueTime`
+    -   `debounceTime()` will emit the last value emitted from the `Observable` when the `timer` is over
+
+    -   `debounce()` takes an `Observable` as `durationSelector`. The `timer` will run depend on `durationSelector`, instead of `dueTime`
+
+    ```typescript
+    this.filterControl.valueChanges.pipe(debounceTime(500)).subscribe(console.log); // output: type 'abcd' -> stop 500ms -> 'abcd'
+    ```
+    -   `debounceTime()` is a good use for implementing input to filter a list
+
+-   `audit()/auditTime()`
+
+    -   `audit<T>(durationSelector: (value: T) => SubscribableOrPromise<any>): MonoTypeOperatorFunction<T>`
+    -   `auditTime<T>(duration: number, scheduler: SchedulerLike = async): MonoTypeOperatorFunction<T>`
+    
+    -   `auditTime()` takes a parameter `duration` and is similar to `throttleTime()` with `{trailing: true}`. When the `timer` is over,
+        `auditTime()` will emit the latest value emitted from the `Observable`
+    
+    ```typescript
+    fromEvent(document, 'click').pipe(auditTime(1000)).subscribe(console.log); // output: click -> wait 1s -> MouseEvent {} -click  wait 1s (trong 1s, click 10 times) -> MouseEvent {} -> click wait 1s -> MouseEvent {}
+    ```
+    
+-   `sample()/sampleTime()`
+
+    -   `sample<T>(notifier: Observable<any>): MonoTypeOperationFunction<T>`
+    -   `sampleTime<T>(period: number, scheduler: SchedulerLike = async): MonoTypeOperationFunction<T>`
+    
+    -   `sampleTime()` takes a parameter `period`. When the `Observable` is `subscribed`, the `timer` will run immediately and emit the latest value
+        from the `Observable` after each `period`
+    
+    ```typescript
+    fromEvent(document, 'click').pipe(sampleTime(1000)).subscribe(console.log); // output: click -> wait 1s -> MouseEvent {}
+    ``` 
+####4 Time Operators:
+    
+![Difference](src/assets/image/rxjs-debounce-audit-sample-throttle.png)
+[Reference: Dev.to](https://dev.to/kosich/debounce-vs-throttle-vs-audit-vs-sample-difference-you-should-know-1f21)
