@@ -1439,6 +1439,7 @@ Creator operators can be called as normal function. `Pipeable` operators will be
         .subscribe(console.log, null, () => console.log('complete')); // output: {age: 4, name: 'Foo'}, {age: 7, name: 'Bar'}, {age: 5, name: 'Foo'} -> complete
     ```
 
+#### Rate limiting operators
 -   `throttle()/throttleTime()`
 
     -   `throttle<T>(durationSelector: (value: T) => SubscribableOrPromise<any>, config: ThrottleConfig = defaultThrottleConfig): MonoTypeOperatorFunction<T>`
@@ -1481,6 +1482,11 @@ Creator operators can be called as normal function. `Pipeable` operators will be
     -   `audit<T>(durationSelector: (value: T) => SubscribableOrPromise<any>): MonoTypeOperatorFunction<T>`
     -   `auditTime<T>(duration: number, scheduler: SchedulerLike = async): MonoTypeOperatorFunction<T>`
     
+    -   `auditTime()` will run when the first value is emitted from the `Observable`
+    -   skip all value in the duration time
+    -   emit the latest value from the `Observable` when the timer is disabled/over
+    -   timer will run again when the next value is emitted from the `Observable`
+    
     -   `auditTime()` takes a parameter `duration` and is similar to `throttleTime()` with `{trailing: true}`. When the `timer` is over,
         `auditTime()` will emit the latest value emitted from the `Observable`
     
@@ -1492,6 +1498,9 @@ Creator operators can be called as normal function. `Pipeable` operators will be
 
     -   `sample<T>(notifier: Observable<any>): MonoTypeOperationFunction<T>`
     -   `sampleTime<T>(period: number, scheduler: SchedulerLike = async): MonoTypeOperationFunction<T>`
+    
+    -   `timer` will run immediately without having to wait for the first value emitted from the `Observable`
+    -   `timer` will run continuously without having to wait for the value from the `Observable`
     
     -   `sampleTime()` takes a parameter `period`. When the `Observable` is `subscribed`, the `timer` will run immediately and emit the latest value
         from the `Observable` after each `period`

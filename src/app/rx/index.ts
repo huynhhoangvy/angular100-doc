@@ -1,5 +1,42 @@
-import { BehaviorSubject, from, fromEvent, fromEventPattern, interval, merge, of, throwError, timer } from 'rxjs';
-import { buffer, bufferTime, delay, map, mapTo, pluck, reduce, scan, toArray } from 'rxjs/operators';
+import {
+    asyncScheduler,
+    BehaviorSubject,
+    from,
+    fromEvent,
+    fromEventPattern,
+    interval,
+    merge,
+    of,
+    Subject,
+    throwError,
+    timer,
+} from 'rxjs';
+import {
+    auditTime,
+    buffer,
+    bufferTime, debounceTime,
+    delay,
+    distinct,
+    distinctUntilChanged,
+    filter,
+    find,
+    first,
+    last,
+    map,
+    mapTo,
+    pluck,
+    reduce, sampleTime,
+    scan,
+    single,
+    skip,
+    skipUntil,
+    skipWhile,
+    take,
+    takeLast,
+    takeUntil,
+    takeWhile, throttleTime,
+    toArray,
+} from 'rxjs/operators';
 
 
 //////////////////////////////////////////
@@ -194,3 +231,118 @@ const state$ = stateSubject.asObservable().pipe(
 stateSubject.next({ name: 'Hello' });
 stateSubject.next({ age: 10 });
 
+///////////////////////////////////////////////////////
+
+const items = [ 1, 2, 3, 4, 5, 6, 7, 8 ];
+
+// filter
+from(items).pipe(filter(x => x % 2 === 0)); // 2, 4, 6 -> complete
+
+// first
+from(items).pipe(first()); // 1 -> complete
+
+from(items).pipe(first(x => x > 4)); // 5 -> complete
+
+from(items).pipe(first(x => x > 10)); // error
+of().pipe(first()); // error
+
+// last
+from(items).pipe(last()); // 6 -> complete
+
+// same other behaviors with first
+
+// find
+from(items).pipe(find(x => x % 2 === 1)); // 1 -> complete
+
+from(items).pipe(find(x => x > 10)); // undefined
+
+// single
+from(items).pipe(single()); // error
+
+from(items).pipe(single(x => x > 7)); // 8 -> complete
+
+from(items).pipe(single(x => x > 2)); // error
+
+// take
+interval(1000).pipe(take(3)); // 1, 2, 3 -> complete
+
+interval(1000).pipe(take(1)); // nothing
+
+// takeLast
+interval(1000).pipe(takeLast(2)); // nothing, bcuz observable is not complete
+
+interval(1000).pipe(take(5), takeLast(2)); // 3, 4 -> complete
+
+// takeUntil
+interval(1000).pipe(takeUntil(timer(5000))); // 0, 1, 2, 3 -> complete
+
+const destroy$ = new Subject();
+
+// @Directive()
+// class abstract class Destroyable implements OnDestroy {
+//     ngOnDestroy() {
+//         subscription.unsubscribe();
+//         subscription2.unsubscribe();
+//         destroy$.next();
+//         destroy$.complete();
+//     }
+// }
+//
+// class Component extends Destroyable {
+//     const subscription = state$.pipe(
+//         map(),
+//         takeUntil(destroy$)
+//     ).subscribe();
+//
+// }
+// const subscription2 = subscription;
+//
+// subscription.add();
+
+// takeWhile
+interval(1000).pipe(takeWhile(x => x < 10)); // 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 -> complete
+
+// skip
+interval(1000).pipe(skip(5)); // 5, 6, 7, 8, 9...
+
+// skipUntil
+interval(1000).pipe(skipUntil(timer(6000))); // 5, 6, 7, 8, 9...
+
+// skipWhile
+interval(1000).pipe(skipWhile(x => x < 6)); // 6, 7, 8, 9...
+
+// distinct
+from([ 1, 2, 3, 4, 5, 6, 4, 3, 6, 1 ]).pipe(distinct()); // 1, 2, 3, 4, 5, 6 -> complete
+
+// distinctUntilChange
+from([ 1, 1, 2, 2, 2, 1, 1, 2, 3, 3, 4 ]).pipe(distinctUntilChanged()); // 1, 2, 1, 2, 3, 4 -> complete
+
+from([ 1, 1, 2, 2, 2, 1, 1, 2, 3, 3, 4 ]).pipe(distinctUntilChanged((a, b) => a.name === b.name)); // 1, 2, 1, 2, 3, 4 -> complete
+
+// throttle/throttleTime
+fromEvent(document, 'mousemove').pipe(
+    throttleTime(1500, asyncScheduler, {trailing: true, leading: false})
+);
+
+fromEvent(document, 'mousemove').pipe(
+    throttleTime(1500, asyncScheduler, {trailing: false, leading: true}) // behave like auditTime
+);
+
+// debounce/debounceTime
+const queryInput = document.querySelector('#queryInput');
+fromEvent(queryInput, 'keydown').pipe(
+    debounceTime(1500, ),
+    pluck('target', 'value'),
+);
+
+// audit/auditTime
+fromEvent(document, 'click')
+    .pipe(
+        auditTime(1500), // internal timer: 1500ms, all emitted value will be skipped,
+        // auditTime emit the last value from the observable when the timer is over
+    ); // 1, 3, 5, 7, 9, 11...
+
+// sampleTime
+interval(1000).pipe(
+    sampleTime(1500) // timer will not wait until the next value emitting but run continuously
+); // 0, 1, 3, 4, 6, 7, 9, 10, 12...
