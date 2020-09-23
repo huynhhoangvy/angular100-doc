@@ -1,41 +1,53 @@
 import {
     asyncScheduler,
     BehaviorSubject,
+    combineLatest,
+    concat,
+    forkJoin,
     from,
     fromEvent,
     fromEventPattern,
     interval,
     merge,
+    Observable,
     of,
+    race,
     Subject,
     throwError,
     timer,
+    zip,
 } from 'rxjs';
 import {
     auditTime,
     buffer,
-    bufferTime, debounceTime,
+    bufferTime,
+    catchError,
+    debounceTime,
     delay,
     distinct,
-    distinctUntilChanged,
+    distinctUntilChanged, endWith,
     filter,
     find,
     first,
     last,
     map,
-    mapTo,
+    mapTo, pairwise,
     pluck,
-    reduce, sampleTime,
+    reduce,
+    sampleTime,
     scan,
     single,
     skip,
     skipUntil,
     skipWhile,
+    startWith,
     take,
     takeLast,
     takeUntil,
-    takeWhile, throttleTime,
+    takeWhile,
+    throttleTime,
     toArray,
+    withLatestFrom,
 } from 'rxjs/operators';
 
 
@@ -96,7 +108,7 @@ const observer = {
 };
 
 // of
-of(1, 2, 3, 4, 5, 'hello', [ 1, 2, 3 ], { foo: 'bar' }).subscribe(observer);
+of(1, 2, 3, 4, 5, 'hello', [1, 2, 3], { foo: 'bar' }).subscribe(observer);
 
 // from
 from(Promise.resolve('hello')).subscribe(observer);
@@ -224,7 +236,7 @@ const stateSubject = new BehaviorSubject(initialState);
 
 const state$ = stateSubject.asObservable().pipe(
     scan((state, partialState) => ({ ...state, ...partialState }), initialState))
-    .subscribe(observer);
+                           .subscribe(observer);
 
 // state$.subscribe(observer);
 
@@ -233,7 +245,7 @@ stateSubject.next({ age: 10 });
 
 ///////////////////////////////////////////////////////
 
-const items = [ 1, 2, 3, 4, 5, 6, 7, 8 ];
+const items = [1, 2, 3, 4, 5, 6, 7, 8];
 
 // filter
 from(items).pipe(filter(x => x % 2 === 0)); // 2, 4, 6 -> complete
@@ -312,26 +324,26 @@ interval(1000).pipe(skipUntil(timer(6000))); // 5, 6, 7, 8, 9...
 interval(1000).pipe(skipWhile(x => x < 6)); // 6, 7, 8, 9...
 
 // distinct
-from([ 1, 2, 3, 4, 5, 6, 4, 3, 6, 1 ]).pipe(distinct()); // 1, 2, 3, 4, 5, 6 -> complete
+from([1, 2, 3, 4, 5, 6, 4, 3, 6, 1]).pipe(distinct()); // 1, 2, 3, 4, 5, 6 -> complete
 
 // distinctUntilChange
-from([ 1, 1, 2, 2, 2, 1, 1, 2, 3, 3, 4 ]).pipe(distinctUntilChanged()); // 1, 2, 1, 2, 3, 4 -> complete
+from([1, 1, 2, 2, 2, 1, 1, 2, 3, 3, 4]).pipe(distinctUntilChanged()); // 1, 2, 1, 2, 3, 4 -> complete
 
-from([ 1, 1, 2, 2, 2, 1, 1, 2, 3, 3, 4 ]).pipe(distinctUntilChanged((a, b) => a.name === b.name)); // 1, 2, 1, 2, 3, 4 -> complete
+// from([1, 1, 2, 2, 2, 1, 1, 2, 3, 3, 4]).pipe(distinctUntilChanged((a, b) => a.name === b.name)); // 1, 2, 1, 2, 3, 4 -> complete
 
 // throttle/throttleTime
 fromEvent(document, 'mousemove').pipe(
-    throttleTime(1500, asyncScheduler, {trailing: true, leading: false})
+    throttleTime(1500, asyncScheduler, { trailing: true, leading: false }),
 );
 
 fromEvent(document, 'mousemove').pipe(
-    throttleTime(1500, asyncScheduler, {trailing: false, leading: true}) // behave like auditTime
+    throttleTime(1500, asyncScheduler, { trailing: false, leading: true }), // behave like auditTime
 );
 
 // debounce/debounceTime
 const queryInput = document.querySelector('#queryInput');
 fromEvent(queryInput, 'keydown').pipe(
-    debounceTime(1500, ),
+    debounceTime(1500),
     pluck('target', 'value'),
 );
 
@@ -344,5 +356,83 @@ fromEvent(document, 'click')
 
 // sampleTime
 interval(1000).pipe(
-    sampleTime(1500) // timer will not wait until the next value emitting but run continuously
+    sampleTime(1500), // timer will not wait until the next value emitting but run continuously
 ); // 0, 1, 3, 4, 6, 7, 9, 10, 12...
+
+// forkJoin
+forkJoin([
+    of('hello').pipe(delay(1000)),
+    of('world').pipe(delay(2000)),
+    interval(1000).pipe(take(2)),
+], (hello, world, inter) => ({ hello, world, inter })).subscribe(observer);
+
+forkJoin([
+    of('hello').pipe(delay(1000)),
+    of('world').pipe(delay(2000)),
+    interval(1000).pipe(take(2)),
+]).pipe(map(([hello, world, inter]) => ({ hello, world, inter }))).subscribe(observer);
+
+// combineLatest
+combineLatest([
+    interval(2000).pipe(map(x => `First: ${x}`)), // {1}
+    interval(1000).pipe(map(x => `Second: ${x}`)), // {2}
+    interval(3000).pipe(map(x => `Third: ${x}`)), // {3}
+]).subscribe(observer);
+
+// zip
+zip(of(1, 2, 3), of(4, 5, 6), of(7, 8, 9)).subscribe(observer);
+
+// concat
+concat(
+    interval(1000).pipe(take(3)),
+    interval(500).pipe(take(5)),
+).subscribe(observer);
+
+// merge
+merge(
+    interval(1000).pipe(take(3), map(x => `First ${x}`)),
+    interval(500).pipe(take(5), map(x => `Second ${x}`)),
+).subscribe(observer);
+
+// race
+race(
+    interval(1000).pipe(take(3), map(x => `first ${x}`)),
+    interval(500).pipe(take(5), map(x => `second ${x}`)),
+).subscribe(observer);
+
+// withLatestFrom
+const withLatestFrom$ = interval(2000).pipe(map(x => `Need latest from this value: ${x}`));
+
+fromEvent(document, 'click').pipe(withLatestFrom(withLatestFrom$)).subscribe(observer);
+
+// startWith
+of('world').pipe(startWith('hello')).subscribe(observer);
+
+// this.loading = true;
+// apiCall.subscribe(() => {this.loading = false});
+
+interface ApiResponse<T> {
+    data: T;
+    isLoading: boolean;
+    error: string;
+}
+
+function getApiResponse<T>(apiCall: Observable<T>): Observable<ApiResponse<T>> {
+    return apiCall.pipe(
+        map(data => ({ isLoading: false, data, error: '' })),
+        startWith({ isLoading: true, data: null, error: '' }),
+        catchError(err => of({ isLoading: false, data: null, error: err.message })),
+    );
+}
+
+// endWith
+of('hello').pipe(endWith('world')).subscribe(observer);
+
+// pairwise
+from([1, 2, 3, 4, 5])
+    .pipe(
+        pairwise(),
+        map(([prev, cur]) => prev + cur)
+    ).subscribe(observer);
+
+fromEvent(document, 'click').pipe(pairwise());

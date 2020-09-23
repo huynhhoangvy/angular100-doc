@@ -1512,3 +1512,490 @@ Creator operators can be called as normal function. `Pipeable` operators will be
     
 ![Difference](src/assets/image/rxjs-debounce-audit-sample-throttle.png)
 [Reference: Dev.to](https://dev.to/kosich/debounce-vs-throttle-vs-audit-vs-sample-difference-you-should-know-1f21)
+
+## Day #23 RXJS Combination Operators
+
+-   `forkJoin()`
+
+    -   `forkJoin(...source: any[]): Observable<any>`
+    -   `forkJoin()` is similar to `Promise.all()`
+    -   `forkJoin()` takes a list of `Observable` (`Array` or `Dictionary`). When all the children `Observable` `complete`,
+        `forkJoin()` emits children `Observable` values as `Array` or `Dictionary`, then `complete`
+    -   The oder does matters
+
+    ```typescript
+    forkJoin([of(1), of('hello'), of({foo: 'bar'})]).subscribe(observer);
+    // output: [1, 'hello', {foo: 'bar'}] -> complete
+    ```
+    -   `forkJoin()` will only emit values when all the children `Observable` `complete`, otherwise it will never emit
+    -   `forkJoin()` will throw `error` when a child `Observable` throw `error`, not correctly handling `error` might
+        lead to the loss of other complete `Observable` values
+    
+    -   `forkJoin()` is commonly used to request multiple `Dropdown/Select`
+    
+    ```typescript
+    forkJoin([
+        this.apiService.getAccountDropdown(),
+        this.apiService.getUserDropdown(),
+        this.apiService.getHomeDropdown()
+    ]).subscribe(observer);
+    // output: [accountList, userList, homeList] -> complete
+    ```
+    
+    -   `forkJoin()` can take an optional parameter `projectFunction` when the children `Observable` is an `Array`
+    -   `projectFunction` will run with the parameter is child `Observable` value, the returned value from `projectFunction`
+        will be the result of `forkJoin()`
+    -   `projectFunction` will only be executed only when `forkJoin()` will be running (all children `Observable` `complete`)
+    
+    ```typescript
+    forkJoin(
+        [
+            this.apiServices.getAccountDropdown(),
+            this.apiServices.getDepartmentDropdown(),
+            this.apiServices.getStoreDropdown()
+        ],
+        (accountList, departmentList, storeList) => {
+            return {
+                accounts: accountList,
+                departments: departmentList,
+                stores: storeList
+            }
+        }
+    ).subscribe(observer);
+    // output: {account: [...], departments: [...], stores: [...]} -> complete
+    ```
+    
+-   `combineLatest()`
+
+    -   `combineLatest<O extends ObservableInput<any>, R>(...observables: (SchedulerLike | O | ((...values: ObservedValueOf<O>[]) => R))[]): Observable<R>`
+    -   Similar to `forkJoin()`, `combineLatest()` takes an `Array<Observable>`
+    -   `combineLatest()` does not take a `Dictionary` and will emit all children `Observable` emitting at least one time, means that
+        child `Observable` does not need to `complete` but emit one value to have `combineLatest()` emit the `Array` of emitted values from
+        the children `Observable` in the right order
+    -   `combineLatest()` emits the first value when all the children `Observable` have emitted at least one time
+    -   `combineLatest()` will next emit value whenever a child `Observable` emits value
+    -   `combineLatest([obs1, obs2]) === combineLatest(obs1, obs2)`
+    ```typescript
+    combineLatest([
+        interval(2000).pipe(map(x => `First${x}`)), // {1}
+        interval(1000).pipe(map(x => `Second${x}`)), // {2}
+        interval(3000).pipe(map(x => `Third${x}`)) // {3}
+    ]).subscribe(observer);
+    
+    // output:
+    // After 3s, because interval(3000) has the longest time:
+    // [First 0, Second 2, Third 0] -> At the third second, {2} has already emitted 3 times (3 seconds, 1 second each 0 -> 1 -> 2)
+    
+    // After 1s (4s in total):
+    // [First 1, Second 2, Third 0] -> At 4th second, {1} emitted 2 times (4 seconds, 2 seconds each 0 -> 1)
+    // [First 1, Second 3, Thrid 0] -> At the 4th second, {2} emiited 4 times (0 -> 1 -> 2 -> 3)
+    
+    // After 1s (5s in total):
+    // [First 1, Second 4, Third 0] -> {2} emitted 5 times
+    
+    // After 1s (6s in total):
+    // [First 2, Second 4, Third 0] -> {1} emitted 3 times
+    // [First 2, Second 5, Third 0] -> {2} emitted 6 times
+    // [First 2, Second 5, Third 1] -> {3} emitted 2 times
+    ```
+    
+    -   Note: 
+        -   After the first time emitting value of childred `Observable`, `combineLatest()` emits the newest value of child
+            `Observable` which is currently emitting value, and the latest value of other children `Observable` emitted
+        -   The 2nd `Observable` `{2}` lost 2 first emitted values `0` and `1` because `{2}` emit rate was faster than the
+            longest emit duration `Observable`, `{3}`. Be careful to avoid `racing condition`
+        -   `combineLatest()` will `complete` when all children `Observable` `complete`
+        -   `combineLatest()` will never `complete` when one child `Observable` does not `complete`
+        -   `combineLatest()` will throw an `error` when a child `Observable` throw an `error`. Emitted values from children
+            `Observable` will be lost (similar to `forkJoin()`)
+            
+    -   Use-case:
+    
+    Commonly used to combine state when using `Service` in `Angular`. Due to `long-lived`, will not `complete` after
+        emitting (use with `AsyncPipe`)
+    
+    ```typescript
+    this.vm$ = combineLatest([
+        this.paginationService.currentPage$,
+        this.paginationService.currentSize$,
+        this.paginationService.totalCount$,
+        this.paginationService.currentOffset$
+    ]).pipe(
+        map((currentPage, currentSize, totalCount, currentOffset) => {
+            return {
+                currentPage,
+                currentSize,
+                totalCount,
+                currentOffset
+            };        
+        })
+    );
+    
+    onSizeChange(newSize: number) {
+        this.paginationService.updateSize(newSize);
+    }
+    
+    onPageChanged(newPage: number) {
+        this.paginationService.updatePage(newPage);
+    }
+    ```
+    
+    ```typescript
+    <ng-container *ngIf="vm$ | async as vm">
+        <app-show-total
+            [offset]="vm.currentOffset"
+            [total]="vm.totalCount"
+            [size]="vm.currentSize"
+        ></app-show-total>
+    <!-- Display: 1 - 20 of 100 -->
+        <app-paginator
+            [current]="vm.currentPage"
+            [total]="vm.totalCount"
+            [size]="vm.currentSize"
+            (sizeChanged)="vm.onSizeChanged($event)"
+            (pageChanged)="vm.onPageChanged($event)"
+        ></app-paginator>
+    </ng-container>    
+    ```
+    
+    When `updateSize()` and `updatePage()` are executed, `currentSize$` and `currentPage$` emit new value, causing `combineLatest()`
+    `vm$` emit new value and the `template` will be updated (`vm$ | async`)
+    
+    Like `forkJoin()`, when the parameter is an `Array<Observable>`, `combineLatest()` can take another parameter `projectFunction`.
+    `projectFunction` will be executed with the parameter is the value of children `Observable`, the result of `projectFunction` will be
+        emitted result of `combineLatest()`
+        
+    ```typescript
+    this.vm$ = combineLatest([
+        this.paginationService.currentPage$,
+        this.paginationService.currentSize$,
+        this.paginationService.totalCount$,
+        this.paginationService.currentOffset$
+    ],
+        (currentPage, currentSize, totalCount, currentOffset) => {
+            return { currentPage, currentSize, totalCount, currentOffset };
+        }
+    );
+    ```
+    
+-   `zip()`
+    -   `zip<O extends ObservableInput<any>, R>(...observables: (O | ((...values: ObservedValueOf<O>[]) => R))[]): Observable<ObservedValueOf<O>[] | R>`
+    -   `zip()` takes parameters `...(Observables | Function)` which is child `Observable` passed in one by one
+    -   `zip()` gathers emitted values from the children `Observable` as groups
+    -   Example: `Obs1 emits 1 - 2 - 3`, `obs2 emits 4 - 5 - 6`, `obs3 emits 7 - 8 - 9`
+        -   `combineLatest()`
+        ```typescript
+        combineLatest(of(1, 2, 3), of(4, 5, 6), of(7, 8, 9)).subscribe(observer);
+        // [1, 4, 7], // all three 3 observables emit
+        // [2, 4, 7], // obs1 emits 2, combineLatest() emits the value of obs1 and 2 latest values of obs2 and obs3
+        // ...
+        // [3, 6, 9]
+        ```
+        -   `zip()`
+        ```typescript
+        zip(of(1, 2, 3, 99), of(4, 5, 6), of(7, 8, 9)).subscribe(observer);
+        // [1, 4, 7], // 3 first numbers of 3 observables
+        // [2, 5, 8], // 3 next numbers
+        // [3, 6, 9], // 3 last numbers
+        ```
+    -   `zip()` will `complete` when one of the children `Observable` `complete`, we can only get the grouped values of `zip`
+    ```typescript
+        zip(of(1, 2, 3, 99), of(4, 5, 6), of(7, 8, 9)).subscribe(observer);
+        // [1, 4, 7], // 3 first numbers of 3 observables
+        // [2, 5, 8], // 3 next numbers
+        // [3, 6, 9], // 3 last numbers
+        // 99 was skipped due to that obs2 and obs3 were completed
+    ```
+    -   `zip()` will throw `error` when a child `Observable` throw error
+    -   `zip()` will treats the last parameter as `projectFunction` if it is a `function`. `projectFunction` works the same as
+        one in `forkJoin()` and `combineLatest()`
+    -   Use-case:
+        -   When the final values are provided by many different `Observable`
+        ```typescript
+        const age$ = of<number>(29, 28, 30);
+        const name$ = of<string>('Chau', 'Trung', 'Tiep');
+        const isAdmin$ = of<boolean>(true, false, true);
+        
+        zip(age$, name$, isAdmin$).pipe(
+            map(([name, age, isAdmin]) => ({age, name, isAdmin}))
+        );
+        // output
+        // { age: 29, name: 'Chau', isAdmin: true }
+        // { age: 28, name: 'Trung', isAdmin: false }
+        // { age: 30, name: 'Tiep', isAdmin: true }
+        
+        // using with projectFunction
+        zip(age$, name$, isAdmin$, (age, name, isAdmin) => ({
+            age, name, isAdmin
+        })).subscribe(observer);
+        ```
+        
+        -   Need to combine values of 2 different `Observables` at different time (get mouse position from `mousedown` to `mouseup`,
+            or get the time duration using `new Date()` in stead of `getCoords()`)
+        ```typescript
+        cosnt log = (event, val) => `${event}: ${JSON.stringify((val))}`;
+        const getCoords = pipe(
+            map((e: MouseEvent) => ({ x: e.clientX, y: e.clientX }))
+        );
+        const documentEvent = (eventName) => {
+            fromEvent(document, eventName).pipe(getCoords);
+        };
+        
+        zip(documentEvent('mousedown'), documentEvent('mouseup')).subscribe(e => console.log(`${log('start', e[0])} ${log('end', e[1])}`));
+        // output
+        // start: { "x": 291, "y": 136 } end: { "x": 143, "y": 168 }
+        // start: { "x": 33, "y": 284 } end: { "x": 503, "y": 74 }
+        ```
+        
+-   `concat()`
+
+    -   `concat<O extends ObservableInput<any>, R>(...observables: (SchedulerLike | O)[]): Observable<ObservedValueOf<O> | R>`
+    -   `concat()` takes parameter `...Observables` as children `Observables` passed in respectively, in stead of an `Array<Observable>`
+    -   `concat()` subscribes to children `Observables` in the order they were passed in
+    -   `concat()` will emit when the currently subscribed `Observable` `complete` ({1})
+        -   `{1}` emits and completes, `concat()` will emit the emitted value from `{1}`, then subscribe to the next `Observable`
+        -   `{1}` throws error, `concat()` throw will error and skipp all the next `Observables`
+        -   `{1}` complets without emitting any value,  `concat()` will skip and subscribe to the next `Observable`
+        -   `{1}` emits value but never `complete`, `concat()` emit that value and WILL NOT SUBSCRIBE to the next `Observable`
+
+    -   `concat()` will complete when there is no next `Observable`
+    
+    ```typescript
+    concat(of(4, 5, 6).pipe(delay(1000)), of(1, 2, 3)).subscribe(observer);
+    // output
+    // after 1s:
+    // 4-5-6-1-2-3
+    // complete
+    ```
+    -   `concat()` waits until `of(4, 5, 6).pipe(delay(1000))` emit and `complete` that it will emit `4-5-6`, then subscribe to `of(1, 2, 3)`
+    -   Pass the same `Observable` many times to `concat()`
+    
+    ```typescript
+    const fiveSecondsTimer = interval(1000).pipe(take(5));
+    
+    concat(fiveSecondsTimer, fiveSecondsTimer, fiveSecondsTimer).subscribe(observer);
+    // output: 0, 1, 2, 3, 4 - 0, 1, 2, 3, 4 - 0, 1, 2, 3, 4
+    // output: 'complete'
+    
+    // using with repeat()
+    concat(fiveSecondsTimer.pipe(repeat(3))).subscribe(observer);
+    // output: 0, 1, 2, 3, 4 - 0, 1, 2, 3, 4 - 0, 1, 2, 3, 4
+    // output: 'complete'
+    ```
+
+-   `merge()`
+
+    -   `merge<T, R>(...Observables: any[]): Observable<R>`
+    -   `merge()` takes parameter `...Observables` as children `Observables` passed in respectively, in stead of an `Array<Observable>`
+    -   `merge()` will not be affected by the order of children `Observables`, causing `merge()` not being stopped subscribing to the
+        next `Observable` wehen the current one never `comoplete`
+    -   The last parameter of `merge()` will be treated as the ` concurrent` when it is a `number`
+    -   `concurrent` defines the number of children `Observables` that `merge()` will subscribe concurrently
+    -   By default, `merge()` will subscribe to all children `Observables` concurrently
+        -   emit any value emitted from any `Observable`
+        -   throw `error` when any of the `Observable` throw `error`
+        -   `complete` only when all the children `Observable` `complete`
+        
+    ```typescript
+    merge(of(4, 5, 6).pipe(delay(1000)), of(1, 2, 3)).subscribe(observer);
+    // output:
+    // 1, 2, 3
+    // after 1s: 4 , 5, 6
+    // complete
+    ```
+    
+    -   `merge()` will emit `1, 2, 3` right away regardless the children `Observables` order
+    
+    ```typescript
+    merge(
+        interval(2000).pipe(mapTo('emit every 2s'), take(3)),
+        interval(1000).pipe(mapTo('emit every second'), take(3))
+    ).subscribe(observer);
+    
+    // output
+    // after 1s: 
+    // "emit every second"
+    // after 2s: 
+    // "emit every 2s"
+    // "emit every second"
+    // after 3s:
+    // "emit every second" -> complete due to emit 3 times
+    // after 4s:
+    // "emit every 2s"
+    // after 6s:
+    // "emit every 2s" -> complete
+    // output: 'complete'
+    ```
+    
+    -   Using with `concurrent`
+    
+    ```typescript
+    merge(
+        interval(1000).pipe(mapTo('first'), take(5)), // will take 5s to complete
+        interval(2000).pipe(mapTo('second'), take(3)), // will take 6s to complete
+        interval(3000).pipe(mapTo('third'), take(2)), // will take 6s to complete
+        2
+    ).subscribe(observer);
+    
+    // output
+    // after 1s:
+    // first
+    // after 2s:
+    // first
+    // second
+    // after 3s:
+    // first
+    // after 4s:
+    // first
+    // second
+    // after 5s:
+    // first -> complete, then third will be subscribed
+    // after 6s:
+    // second -> complete
+    // after 8s: 
+    // third
+    // after 11s:
+    // third -> complete
+    ```
+    
+    -   `concat()` is the shorthand of `merge()` with `concurrent = 1`
+    
+    -   Use-case:
+        -   When there are many `FormGroup` and we need to listen to every `FormControl.valueChanges` and the order does not matter
+        
+        ```typescript
+        const formControlValueChanges = Object.keys(this.formGroup.value).map(key => (
+            this.formGroup.get(key).valueChanges.pipe(map(value => ({key, value})))
+        )); // { firstName: 'Chau', lasName: 'Tran' } -> [Observable<{key, value}>, Observable<{key, value}>]
+        merge(...formControlValueChanges).subscribe(({key, value}) => {
+            if (key === 'firstName') {...};
+            if (key === 'lasName') {...};
+        });
+        ```
+        
+-   `race()`
+
+    -   `race<T>(...observables: any[]): Observable<T>`
+    -   `race()` has the same parameters as `merge()` and `concat()`
+    -   `race()` will emit the first emiited value from the child `Observable`, repeats until one child `Observable` `complete`
+    -   `race()` will throw `error` when a child `Observable` throw `error`
+
+    ```typescript
+    race(
+        interval(1000).pipe(mapTo('fast')),
+        interval(2000).pipe(mapTo('medium')),
+        interval(3000).pipe(mapTo('slow'))
+    ).subscribe(observer);
+    // output: 1s -> fast -> 1s -> fast -> 1s -> fast ...
+    ```
+
+    -   Use-case:
+        -   To display a banner according to user's action (user submits a form -> display the success notification 
+            banner/ or error. Objective: Hide the banner when 1 condition out of 3 is satisfied):
+            -   After 10s displaying
+            -   User closes the banner
+            -   User navigates to another page
+
+        ```typescript
+        race(
+            timer(10000), // timer 10s
+            this.userClick$, // user click event
+            this.componentDestroy$, // navigate -> destroy
+        )
+            .pipe(takeUntil(this.componentDestroy$)) // do not listen to race anymore when the commponent destroy
+            .subscribe(() => this.closeBanner());
+        ```
+
+    -   These above operators are `static function`. The next operators are `pipeable operator`, meaning they can be used
+        with `pipe()` and will be wrapped by an `Observable`, called `Outer Observable`
+
+-   `withLatestFrom()`
+
+    -   `withLatestFrom<T, R>(...args: any[]): OperatorFunction<T, R>`
+    -   `withLatestFrom()` take an `Observable` parameter
+    -   `withLatestFrom()` combine emitted values from `Outer Observable` with the latest value emitted from the parameter 
+        `Observable` to an `Array`, then emits the `Array`
+        
+    ```typescript
+    fromEvent(document, 'click')
+        .pipe(withLatestFrom(interval(1000)))
+        .subscribe(observer);
+    // output
+    // click before 1s --- wait until 1s -> [MouseEvent, 0]
+    // click after 1s -> [MouseEvent, 0];
+    // click at 5.5s -> [MouseEvent, 4]; // after 5s, the latest value of interval(1000) is 4 (0, 1, 2, 3, 4)
+    ```
+    
+    -   `withLatestFrom()` has an optional parameter `projectFunction`
+
+    -   Use-case:
+        -   Because `withLatestFrom()` only emits when `Outer Observable` emits, it will be used to listen to one `Observable`
+            (the `Outer Observable`) and the latest value from another `Observable`. `combineLatest()` will emit every time
+            the other `Observable` emit, which is not needed
+    
+        ```typescript
+        this.apiService.getSomething().pipe(withLatestFrom(this.currentLoggedInUser$));
+        // make an api request -> use the request result + logged in user information to implement some logic        
+        ```
+
+-   `startWith()`
+
+    -   `startWith<T, D>(...array: (SchedulerLike | T)[]): OperatorFunction<T, T | D>`
+    -   `startWith()` take `list` parameter
+    -   The first value be emitted will the the value of `startWith()`, then the value of `Outer Observable`
+    -   `startWith()` will emit the value right away without depending on whether `Outer Observable` has emitted value or not
+
+    ```typescript
+    of('world').pipe(startWith('Hello')).subscribe(observer);
+    // output:
+    // 'Hello'
+    // 'world'
+    // 'complete'
+    ```
+    
+    -   Use-case:
+        -   Use `startWith()` to provide intial value for api request
+        
+        `this.book$ = this.apiService.getBooks().pipe(startWith([]));`
+        
+        ```typescript
+        <ng-container *ngIf="book$ | async as books">
+            <!-- books$ === [] -> truthy -> content inside ng-container will be rendered -->
+        </ng-container>
+        ```
+
+-   `endWith()`
+
+    -   `endWith<T>(...array: (SchedulerLike | T)[]): OperatorFunction<T>`
+    -   `endWith()` takes a `list` as parameter and works against `startWith()`
+    -   `endWith()` will emit value whenever `Outer Observable` `complete`
+    
+    ```typescript
+    of('hi', 'how are you?', 'sorry, I have to go')
+        .pipe(endWith('goodbye!'))
+        .subscribe(observer);
+    // ouput: 
+    // hi
+    // how are you?
+    // sorry, I have to go
+    // goodbye!
+    ```
+
+-   `pairwise()`
+
+    -   `pairwise<T>(): OperatorFunction<T, [T, T]>`
+    -   `pairwise()` combine latest values and the currently being emitted value of the `Outer Observable` to an `Array` and emit that `Arrau`
+    
+    ```typescript
+    from([1, 2, 3, 4, 5])
+        .pipe(
+            pairwise(),
+            .map((prev, cur) => prev + cur)
+        ).subscribe(observer);
+    // ouput: 
+    // 3 (1 + 2)
+    // 5 (2 + 3)
+    // 7 (3 + 4)
+    // 9 (4 + 5)
+    ```
+
