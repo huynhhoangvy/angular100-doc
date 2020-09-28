@@ -1868,8 +1868,8 @@ Creator operators can be called as normal function. `Pipeable` operators will be
             this.formGroup.get(key).valueChanges.pipe(map(value => ({key, value})))
         )); // { firstName: 'Chau', lasName: 'Tran' } -> [Observable<{key, value}>, Observable<{key, value}>]
         merge(...formControlValueChanges).subscribe(({key, value}) => {
-            if (key === 'firstName') {...};
-            if (key === 'lasName') {...};
+            if (key === 'firstName') {...}
+            if (key === 'lasName') {...}
         });
         ```
         
@@ -1998,4 +1998,243 @@ Creator operators can be called as normal function. `Pipeable` operators will be
     // 7 (3 + 4)
     // 9 (4 + 5)
     ```
+
+## DAY 24 - RXJS ERROR HANDLING & CONDITIONAL OPERATORS
+
+#### RxJS error handling operators
+
+-   `catchError`
+
+    -   Use `catchError` to catch the `error` and handle it (e.g. to transform the `error` to a value) without terminate
+        the `stream`
+    -   `catchError<T, O extends ObservableInput<any>>(selector: (err: any, caught: Observable<T>) => O): OperatorFunction
+        <T, T | ObservedValueOf<O>>`
+        
+    ```typescript
+    const observer = {
+        next: val => console.log(val),
+        error: err => console.error(err),
+        complete: () => console.log('complete')
+    };
+    import {of} from 'rxjs';
+    import {map, catchError} from 'rxjs/operators';
+    const cached = [4, 5];
+    of(1, 2, 3, 4, 5)
+        .pipe(
+            map(n => {
+                if (cached.includes(n)) {
+                    throw new Error('Duplicated: ' + n);
+                }   
+                return n;
+            }),
+            catchError((err, caught) => of(err))
+        ).subscribe(observer);
+    
+    // output:
+    // --1--2--3--(next: Error)
+    ```
+    
+    -   By default, `observer.error` will be responsible for handling `Error`, however, `next: Error` is returned, this
+        `error` will be handled by `observer.next`
+
+    -   Use `catchError` to prevent `forkJoin` from emitting `error` from child `Observable`, split the `error` in the next
+        `pipe` by using `catchError`
+
+    ```typescript
+    forkJoin([
+        of(1),
+        of(2),
+        throwError(new Error('401')),
+    ]).subscribe(observer);
+    // output:
+    // --(x: Error 401)
+    
+    //with catchError
+    forkJoin([
+        of(1),
+        of(2),
+    throwError(newError('401')).pipe(catchError(err => of(err))
+    ),
+    ]).subscribe(observer);
+    
+    // output: 
+    // (next: [1, 2, Error 401])
+    ```
+
+    -   `retry` can be used if we return to the previous `Observable` (source `Observable`), but be careful of infinity loop
+    -   Use `take` to `retry` with number of time limit
+    
+    ```typescript
+    of(1, 2, 3, 4, 5)
+        pipe(
+            map(n => {
+                if (cached.includes(n)) {
+                    throw new Error('Duplicate: ' + n)
+                }
+                return n;
+            }),
+            catchError((err, caught) => caught),
+            take(10)
+        ).subscribe(observer);
+    // output:
+    // --1--2--3--1--2--3--1|
+    ```
+    
+    -   In `catchError`, we can throw `error` to the next `pipe` to handle it
+
+-   `retry`
+
+    -   Return an `Observable` that mirors the source `Observable` with the exception of an `error`. If the source `Observable`
+        calls error, this method will resubscribe to the source `Observable` for a maximum of count resubscription 
+        (given as a number parameter) rather than propagating the error call
+    
+    -   `retry<T>(count: number = -1): MonoTypeOperatorFunction<T>`
+    -   This operator will resubscribe to the source `Observable` when there is `error` emitted from the source
+    -   When there is no `count` parameter, there will be no limit for `retry` time and vice versa
+    
+    -   Commonly use to retry `HTTP request` (only for getting data, not for creating, updating or deleting to prevent race condition)
+    
+    ```typescript
+    const cached = [4, 5];
+    of(1, 2, 3, 4, 5)
+        .pipe(
+            map(n => {
+                if (cached,includes(n)) {
+                    throw new Error('Duplicated ' + n);
+                }        
+                return n;
+            }),
+            retry(3)
+        ).subscribe(observer);
+    // ouput:
+    // --1--2--3--1--2--3--1--2--3--1--2--3--(x: Error)
+    ```
+
+    -   `retryWhen` can be used to control when to `retry`
+    -   Use-case: `retryBackoff` operator - which will increase time after each `retry`
+    
+    ```typescript
+    export function retryBackoff(
+      config: number | RetryBackoffConfig
+    ): <T>(source: Observable<T>) => Observable<T> {
+      const {
+        initialInterval,
+        maxRetries = Infinity,
+        maxInterval = Infinity,
+        shouldRetry = () => true,
+        resetOnSuccess = false,
+        backoffDelay = exponentialBackoffDelay,
+      } = typeof config === 'number' ? { initialInterval: config } : config;
+      return <T>(source: Observable<T>) =>
+        defer(() => {
+          let index = 0;
+          return source.pipe(
+            retryWhen<T>(errors =>
+              errors.pipe(
+                concatMap(error => {
+                  const attempt = index++;
+                  return iif(
+                    () => attempt < maxRetries && shouldRetry(error),
+                    timer(
+                      getDelay(backoffDelay(attempt, initialInterval), maxInterval)
+                    ),
+                    throwError(error)
+                  );
+                })
+              )
+            ),
+            tap(() => {
+              if (resetOnSuccess) {
+                index = 0;
+              }
+            })
+          );
+        });
+    }
+    ```
+
+#### RxJS Error Conditional Operators
+
+-   `defaultIfEmpty/throwIfEmpty`
+    -   `defaultIfEmpty<T, R>(defaultValue: R = null): OperatorFunction<T, T | R>`
+    -   `throwIfEmpty<T>(errorFactory: () => any = defaultErrorFactory): MonoTypeOperatorFunction<T>`
+    -   These 2 operators return corresponding values (default value or `Error`) when the source stream is empty (complete
+        without emitting any value)
+        
+    -   E.g. Create a transaction that will be cancelled and throw error if there is no confirmation after 1s
+    
+    ```typescript
+    const click$ = fromEvent(document, 'click');
+    
+    click$.pipe(
+        takeUntil(timer(1000)),
+        throwIfEmpty(
+            () => new Error('the document was not click within 1s')
+        ),
+    ).subscribe(observer);
+    ```
+
+-   `every`
+
+    -   Returns an `Observable` that emits whether or not every item of the source satisfies the specified condition
+    -   `every<T>(predicate: (value: T, index: number, source: Observable<T>) => boolean, thisArg?: any): OperatorFunction<T, boolean>`
+    -   This operator will return true when all the source's emitted values satisfy the `predicate`
+    -   There will be nothing emitted when the source does not `complete`
+    
+    ```typescript
+    of(1, 2, 3, 4, 5, 6).pipe(
+        every(x => x < 5),
+    ).subscribe(observer);
+    // output: ---false
+    ```
+    
+    -   Use first with `predicate` to get the behavior like `some`
+    
+    ```typescript
+    of(1, 2, 3, 4, 5, 6).pipe(
+        first(x => x > 10, false),
+        map(v => Boolean(v))
+    ).subscribe(observer);
+    // output: --- true
+    ```
+    
+-   `iif`
+
+    -   Decides at subscription time which Observable will actually be subscribed
+    -   `iif<T = never, F = never>(condition: () => boolean, trueResult: SubscribableOrPromise<T> = EMPTY, 
+        falseResult: SubscribableOrPromise<F> = Empty): Observable<T | F>`
+    -   This operator is use to select which `Observable` to subscribe under condition
+    -   `iif` accepts a condition function and two `Observables`. When an `Observable` returned by the operator is subscribed, 
+        condition function will be called. Based on what boolean it returns at that moment, consumer will subscribe either 
+        to the first `Observable` (if condition was true) or to the second (else false). Condition function may also not 
+        return anything - in that case condition will be evaluated as false and second `Observable` will be subsribed
+    -   Note that `Observable` for both cases (true and false) are optional. If condition points to an `Observable` that 
+        was left undefined, resulting stream will simply complete immediately. That allows you to, rather than controlling
+        which `Observable` will be subscribed, decide at runtime if consumer should have access to given `Observable` or not
+    -   If you have more complex logic that requires decision between more than two `Observables`, `defer` will probably 
+        be a better choice. Actually `iif` can be easily implemented with `defer` and exists only for convenience and readability reasons
+        
+    ```typescript
+    let subscribeToFirst;
+    const firstOrSecond = iif(
+        () => subscribeToFirst,
+        of('first'),
+        of('second'))
+    );
+    
+    subscribeToFirst = true;
+    firstOrSecond.subscribe(value => console.log(value));
+    
+    // Logs:
+    // 'first'
+    
+    subscribeToFirst = false;
+    firstOrSecond.subscribe(value => console.log(value));
+    
+    // Logs:
+    // 'second'
+    ```
+    
+    
+    
 

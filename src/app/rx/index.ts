@@ -2,11 +2,11 @@ import {
     asyncScheduler,
     BehaviorSubject,
     combineLatest,
-    concat,
+    concat, defer,
     forkJoin,
     from,
     fromEvent,
-    fromEventPattern,
+    fromEventPattern, iif,
     interval,
     merge,
     Observable,
@@ -22,10 +22,10 @@ import {
     buffer,
     bufferTime,
     catchError,
-    debounceTime,
+    debounceTime, defaultIfEmpty,
     delay,
     distinct,
-    distinctUntilChanged, endWith,
+    distinctUntilChanged, endWith, every,
     filter,
     find,
     first,
@@ -33,7 +33,7 @@ import {
     map,
     mapTo, pairwise,
     pluck,
-    reduce,
+    reduce, retry,
     sampleTime,
     scan,
     single,
@@ -45,7 +45,7 @@ import {
     takeLast,
     takeUntil,
     takeWhile,
-    throttleTime,
+    throttleTime, throwIfEmpty,
     toArray,
     withLatestFrom,
 } from 'rxjs/operators';
@@ -436,3 +436,94 @@ from([1, 2, 3, 4, 5])
     ).subscribe(observer);
 
 fromEvent(document, 'click').pipe(pairwise());
+
+const handleError = () => {
+    console.log(`
+    ----------------------
+    I am handling the error. Alerting the users
+    `);
+};
+
+// catchError
+throwError('i am an error');
+
+const obs = throwError('i am an error').pipe(
+    catchError((err, caught) => {
+        handleError();
+        return of('default value');
+    })
+);
+
+throwError('ugly error').pipe(
+    catchError(err => {
+        handleError();
+        const beautifyError = new Error('friendly error');
+        return beautifyError;
+    })
+);
+
+const cached = [4, 5];
+of(1, 2, 3, 4, 5).pipe(
+    map(n => {
+        if (cached.includes(n)) {
+            throw new Error('Duplicated: ' + n);
+        }
+        return n;
+    }),
+    catchError((err, caught) => caught),
+    take(5)
+);
+
+// retry
+of(1, 2, 3, 4, 5).pipe(
+    map(n => {
+        if (cached.includes(n)) {
+            throw new Error('Duplicated: ' + n);
+        }
+        return n;
+    }),
+    catchError((err, caught) => caught),
+    retry(5)
+);
+
+// retryWhen
+
+// defaultIfEmpty/throwIfEmpty
+of().pipe(
+    delay(3000),
+    defaultIfEmpty('default if empty value')
+);
+
+of().pipe(
+    delay(3000),
+    throwIfEmpty(() => 'throw error if empty')
+);
+
+// every
+of(1, 2, 3, 4, 5, 0).pipe(
+    every(x => x > 0) // output: false
+);
+
+// const obs = condition ? obs1 : obs2;
+
+const userId = null;
+
+function updateObservable(id) {
+    if (id == null) {
+        throw new Error('id cannot be null');
+    }
+    return of('update');
+}
+
+function createObservable() {
+    return of('create');
+}
+
+iif(() => userId != null, updateObservable(userId), createObservable());
+// iif invoke/evaluate both updateObservable and createObservable
+// throw error in updateObservable though only createObservable get executed
+
+defer(() => {
+    return userId != null ? updateObservable(userId) : createObservable();
+});
+
