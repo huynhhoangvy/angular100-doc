@@ -2,15 +2,17 @@ import {
     asyncScheduler,
     BehaviorSubject,
     combineLatest,
-    concat, defer,
+    concat,
+    defer,
     forkJoin,
     from,
     fromEvent,
-    fromEventPattern, iif,
+    fromEventPattern,
+    iif,
     interval,
     merge,
     Observable,
-    of,
+    of, partition,
     race,
     Subject,
     throwError,
@@ -22,18 +24,27 @@ import {
     buffer,
     bufferTime,
     catchError,
-    debounceTime, defaultIfEmpty,
+    concatMap,
+    debounceTime,
+    defaultIfEmpty,
     delay,
     distinct,
-    distinctUntilChanged, endWith, every,
+    distinctUntilChanged,
+    endWith,
+    every,
+    exhaustMap,
     filter,
     find,
     first,
     last,
     map,
-    mapTo, pairwise,
+    mapTo,
+    mergeAll,
+    mergeMap,
+    pairwise,
     pluck,
-    reduce, retry,
+    reduce,
+    retry,
     sampleTime,
     scan,
     single,
@@ -44,8 +55,9 @@ import {
     take,
     takeLast,
     takeUntil,
-    takeWhile,
-    throttleTime, throwIfEmpty,
+    takeWhile, tap,
+    throttleTime,
+    throwIfEmpty,
     toArray,
     withLatestFrom,
 } from 'rxjs/operators';
@@ -432,7 +444,7 @@ of('hello').pipe(endWith('world')).subscribe(observer);
 from([1, 2, 3, 4, 5])
     .pipe(
         pairwise(),
-        map(([prev, cur]) => prev + cur)
+        map(([prev, cur]) => prev + cur),
     ).subscribe(observer);
 
 fromEvent(document, 'click').pipe(pairwise());
@@ -451,39 +463,39 @@ const obs = throwError('i am an error').pipe(
     catchError((err, caught) => {
         handleError();
         return of('default value');
-    })
+    }),
 );
 
-throwError('ugly error').pipe(
-    catchError(err => {
-        handleError();
-        const beautifyError = new Error('friendly error');
-        return beautifyError;
-    })
-);
+// throwError('ugly error').pipe(
+//     catchError(err => {
+//         handleError();
+//         const beautifyError = new Error('friendly error');
+//         return beautifyError;
+//     })
+// );
 
 const cached = [4, 5];
 of(1, 2, 3, 4, 5).pipe(
     map(n => {
-        if (cached.includes(n)) {
+        if ( cached.includes(n) ) {
             throw new Error('Duplicated: ' + n);
         }
         return n;
     }),
     catchError((err, caught) => caught),
-    take(5)
+    take(5),
 );
 
 // retry
 of(1, 2, 3, 4, 5).pipe(
     map(n => {
-        if (cached.includes(n)) {
+        if ( cached.includes(n) ) {
             throw new Error('Duplicated: ' + n);
         }
         return n;
     }),
     catchError((err, caught) => caught),
-    retry(5)
+    retry(5),
 );
 
 // retryWhen
@@ -491,17 +503,17 @@ of(1, 2, 3, 4, 5).pipe(
 // defaultIfEmpty/throwIfEmpty
 of().pipe(
     delay(3000),
-    defaultIfEmpty('default if empty value')
+    defaultIfEmpty('default if empty value'),
 );
 
 of().pipe(
     delay(3000),
-    throwIfEmpty(() => 'throw error if empty')
+    throwIfEmpty(() => 'throw error if empty'),
 );
 
 // every
 of(1, 2, 3, 4, 5, 0).pipe(
-    every(x => x > 0) // output: false
+    every(x => x > 0), // output: false
 );
 
 // const obs = condition ? obs1 : obs2;
@@ -509,7 +521,7 @@ of(1, 2, 3, 4, 5, 0).pipe(
 const userId = null;
 
 function updateObservable(id) {
-    if (id == null) {
+    if ( id == null ) {
         throw new Error('id cannot be null');
     }
     return of('update');
@@ -526,4 +538,77 @@ iif(() => userId != null, updateObservable(userId), createObservable());
 defer(() => {
     return userId != null ? updateObservable(userId) : createObservable();
 });
+
+// Higher Order Observable & Utility Operators
+
+// Observable<number>
+// Observable<string>
+// Observable<Observable>
+const hoo = interval(1000) // Outer Observable
+    .pipe(map(val => of(`I am at: ${val}`))); // Inner Observable
+
+// hoo.subscribe(obs => {
+//     obs.subscribe(console.log);
+// });
+
+const mergeAllObs = fromEvent(document, 'click')
+    .pipe(map(val => interval(1000).pipe(take(5))), mergeAll());
+
+// mergeAllObs.subscribe(console.log);
+
+// mergeAll()
+// switchAll()
+// concatAll()
+
+// mergeMap() = mergeAll() + map(): subscribe to the a number of Observable depending on concurrent
+const mergeMapTest = fromEvent(document, 'click')
+    .pipe(mergeMap(val => interval(1000).pipe(take(5))));
+
+// switchMap() = switchAll() + map(): only one subscription, subscribe -> new -> skip and subscribe the new one
+// ngOnInit() {
+//     this.queryControl.valueChanges
+//         .pipe(
+//             debounceTime(500),
+//             tap(() => {
+//                 this.loading = true;
+//             }),
+//             startWith(''),
+//             // map(query => this.userSerbice.getUsers(query).pipe(
+//             switchMap(query => this.userService.getUsers(query).pipe(
+//                 tap(() => {
+//                     this.loading = false;
+//                 }),
+//             )),
+//             // switchAll()
+//         )
+//         .subscribe(users => {
+//             this.users = users;
+//         });
+// }
+
+
+// concatMap() = concatAll() + map(): subscribe -> new -> unsubscribe -> subscribe
+const concatMapTest = fromEvent(document, 'click')
+    .pipe(concatMap(val => interval(1000).pipe(take(5))));
+
+// exhaustMap: 1 subscription -> cancel all observable during the subscription -> complete and have new obs -> subscribe
+const exhaustMapTest = fromEvent(document, 'click')
+    .pipe(exhaustMap(val => interval(1000).pipe(take(5))));
+
+// partition: divide an Observable into 2 new Obs depending on satisfying the predicate condition
+const interval$ = interval(1000);
+
+const [even$, odd$] = partition(interval$, val => val % 2 === 0);
+
+// merge(even$.pipe(val => `even: ${val}`), odd$.pipe(val => `odd: ${val}`));
+
+// tap
+even$.pipe(
+    tap(val => console.log('before: ', val)),
+    map(val => val * 2),
+    tap(val => console.log('after: ', val))
+);
+
+
+
 

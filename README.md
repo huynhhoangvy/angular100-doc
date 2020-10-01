@@ -2235,6 +2235,404 @@ Creator operators can be called as normal function. `Pipeable` operators will be
     // 'second'
     ```
     
-    
-    
+## DAY 25 RXJS HIGHER ORDER OBSERVABLES AND UTILITY OPERATORS
 
+-   Higher Order Observables
+    -   HOOs are operators which take `Outer Observable` (`Source`) and return an `Inner Observable` (`Destination`)
+    
+    ```typescript
+    interval(1000)
+    .pipe(map(val => val * 2))
+    .subscribe(observer);
+    // output: 0 -- 2-- 4 -- 6 -- 8
+    ```
+    
+    ```typescript
+    fromEvent(document, 'click')
+        .pipe(map(() =>  interval(1000)))
+        .subscribe(observer);
+    // click
+    // output: Observable {}
+    // click
+    // output: Observable {}
+    // click
+    // output: Observable {}
+    ```
+
+    ```typescript
+    const source = fromEvent(document, 'click').pipe(map(() => interval(1000)));
+
+    source.pipe(mergeAll()).subscribe(console.log);
+    source.pipe(switchAll()).subscribe(console.log);
+    source.pipe(concatAll()).subscribe(console.log);
+    ```
+
+    -   `mergeAll/switchAll/concatAll` transform `Higher Order Observable` into `First Order Observable` by subscribing to
+        `Observables` returned from `map()`
+    -   `Higher Order Observable === mergeAll/switchAll/concatAll + map()`
+
+    ```typescript
+    this.queryInput.valueChanges.pipe(debounceTime(500)).subscribe((query) => {
+        this.apiService.filterData(query).subscribe(data => {
+            ...
+            return;
+        });
+    });
+    ```
+
+    -   Use-case: `FormControl` with `queryInput` used to handle a `Text Input`. We listen to `valueChanges` to make api request
+        with new `query`. However, the above codes is an example of `Nested Subscription`
+        -   User types `"abc"` in `queryInput` and stop
+        -   After 500ms, (`debounceTime()`), `valueChanges` emits `abc` and we subscribe to `valueChanges` with the 
+            `observer`: `query => {...}`
+        -   Make api request by calling `apiService.filterData(query)`, which is also an `Observable, and subscribe to it
+        -   After some time, we get the `data` and display it on the template
+    
+        Things work fine, until:
+        
+        -   User deletes `abc`, types `xyz`, make api request `apiService.filterData(query)` with `xyz` {1}
+        -   User changes `query` from `xyz` to `abcxyz`
+        -   After 500ms, call `apiService.filterData(query)` with `abcxyz` {2}
+        -   {1} finished and returned `data`. `data` from {1} should be the `data` with `xyz`, not `abcxyz` --> racing condition
+    
+    -   We should avoid `Nested Subscription` due to that we cannot handle both the 2 `Observable` synchronously. The solution is using `HOOs`
+
+-   `switchMap()`
+    -   `switchMap<T, R, O extends ObservableInput<any>>(project: (value: T, index: number) => O, resultSelector?: 
+        (outerValue: T, innerValue: ObservedValueOf<O>, outerIndex: number, innerIndex: number) => R): OperatorFunction<T, ObservedValueOf<O> | R>`
+    -   `switchMap()` takes a `projectFunction` which will take emitted values from the `Outer Observable` and will return 
+        an `Observable` (`Inner Observable`)
+    -   The final value of the `Outer Observable` using with `switchMap()` will be the emitted value from the `Inner Observable`
+
+    ```typescript
+    fromEvent(document, 'click').pipe(
+        switchMap(() => interval(1000).pipe(take(10)))
+    );
+    ```
+    -   `fromEvent(document, 'click')`: create an `Observable` from `click` event on `document`. A value will be emitted after `click`
+    -   `interval(1000).pipe(take(10))`: return an `Observable` emitting 1 value each second and will complete after 10 seconds
+    -   When the `Outer Observable` emits a new value, an `Inner Observable` is returned, then `switchMap()` will subscribe to the `Inner Observable`
+    -   `switchMap()` will `unsubscribe` to the `Inner Observable` when a new `Inner Observable` is returned. `switchMap()`
+        will only have 1 `subscription` at a time
+
+    1.  `click` on the Document -> `Outer` emits -> `interval()` is returned to `switchMap()` ({1})
+    2.  `switchMap()` subscribes to {1}
+    3.  console.log from {1} `00 -- 1 -- 2 -- 3 -- 4...`. This `interval()` takes 10 seconds to complete
+    4.  At 5-6sec, `click` on the Document again -> `Outer` emits the second time, a new `interval()` is returned to `switchMap()` {2}
+    5. `switchMap()` `unsubscribes` to {1} and `subscribes` to {2}
+    6.  console.log `0 -- 1 -- 2 -- 3...` from {2}
+
+    -   `switchMap()` will `unsubscribe` to `Inner Observable` when the `Inner Observable` has not completed and the
+        `Outer Observable` emits value. `switchMap()` can be used to implement `queryInput` mentioned aboved
+
+    ```typescript
+    this.queryInput.valueChanges
+        .pipe(
+            debounceTime(500),
+            switchMap(query => this.apiService.filterData(query))
+        ).subscribe(data => {
+        ...
+        });
+    ```
+
+    -   Note:
+        -   `switchMap = switch + map`. However, the behavior will be different when using with `Promise` due to its `non-cancellable`
+        -   Only use `switchMap` for `GET` data when using `HTTP Client` in `Angular`
+        -   Use `mergeMap` or `concatMap` for `Create`, `Update`, `Delete` to avoid `race condition`
+        
+-   `mergeMap()`
+    
+    -    `mergeMap<T, R, O extends ObservableInput<any>>(project: (value: T, index: number) => O, resultSelector?: number |
+        ((outerValue: T, innerValue: ObservedValueOf<O>, outerIndex: number, innerIndex: number) => R), concurrent: number
+        = Number.POSITIVE_INFINITY): OperatorFunction<T, ObservedValueOf<O> | R>`
+    -   `mergeMap()` takes a `projectFunction` which will take emitted value from the `Outer Observable` and return an `Inner Observable`.
+        Then, `mergeMap()` will `subscribe` to this `Inner Observable`
+    -   `Outer Observable` + `mergeMap()` will finally emit the value emitted from the `Inner Observable`
+    -   `mergeMap()` will not unsubscribe to the old `Inner Observable` when there is a new one. `mergeMap()` will have 
+        multiple `subscription`
+    -   `mergeMap()` will be useful when there is no need to stop/cancel the `Inner Observable` when the `Outer Observable`
+        emit a new value
+
+    ```typescript
+    fromEvent(document, 'click').pipe(
+        mergeMap(() => interval(1000).pipe(take(10)))
+    );
+    // click -> subscribe {1}
+    // {1}: 0 -- 1 -- 2 -- 3 -- 4
+    // click -> subscribe {2}
+    // {1}: 5 -- 6 -- 7 -- 8
+    // {2}: 0 -- 1 -- 2 -- 3
+    // click -> subscribe {3}
+    // {1}: 9 -- complete {1}
+    // {2}: 4 -- 5 -- 6 -- 7 -- 8 -- 9 -- complete {2}
+    // {3}: 0 -- 1 -- 2 -- 3 -- 4 -- 5 -- 6 -- 7 -- 8 -- 9 -- complete {3}
+    ```
+
+    -   `mergeMap()` can take a parameter `concurrent` to control the number of running `Inner Observable` at a time
+    -   `mergeMap()` + `concurrent = 1` `===` `concatMap()`
+
+-   `concatMap()`
+
+    -   `concatMap<T, R, O extends ObservableInput<any>>(project: (value: T, index: number) => O, resultSelector?: 
+        (outerValue: T, innerValue: ObservedValueOf<O>, outerIndex: number, innerIndex: number) => R): OperatorFunction<T, ObservedValueOf<O> | R>`
+    -   `concatMap()` takes a `projectFunction` which return an `Inner Observable`
+    -   `concatMap()` will `subscribe` to the next `Inner Observable` (when there is one)
+
+    ```typescript
+    fromEvent(document, 'click').pipe(
+        concatMap(() => interval(1000).pipe(take(5)))
+    );
+    // click -> subscribe {1}
+    // click -> nothing
+    // {1}: 3 -- 4 -- complete {1}
+    // subscribe {2}
+    // {2}: 0 -- 1
+    // click -> nothing
+    // {2}: 2 -- 3 -- 4 -- complete {2}
+    // subscribe {3}
+    // {3}: 0 -- 1 -- 2 -- 3 -- 4 -- complete {2}
+    ```
+
+    -   `concatMap()` will wait until `{1}` complete that it subscribe to `{2}`, and then `{3}`
+    -   `concatMap()` will be usefull to implement task which the order matters
+
+    ```typescript
+    from([image1, image2, image3]).pipe(
+        // img1, img2, img3 are file type
+        concatMap(singleImage => this.apiService.upload(singleImage)) // upload images in order
+    );
+    ```
+
+    -   Note:
+        -   `concatMap = concatAll + map`. However, the behavior will be different when using with `Promise` due to its `eager`
+        
+        ```typescript
+        fromEvent(document, 'click').pipe(
+            map(() => axios('...')),
+            concatAll()
+        );
+        ```
+
+        -   The request will be sent right when it is being invoked, making `concatAll()` useless. This sometimes causes `raceing condition`
+
+-   `exhaustMap()`
+
+    -   `exhaustMap<T, R, O extends ObservableInput<any>>(project: (value: T, index: number) => O, resultSelector?: (outerValue:
+        T, innerValue: ObservedValueOf<O>, outerIndex: number, innerIndex: number) => R): OperatorFunction<T, ObservedValueOf<O> | R>`
+    -   `exhaustMap()` takes a `projectFunction` which will return an `Inner Observable`
+    -   `exhaustMap()` will then `subscribe` to this `Inner Observable` . While the `Inner Observable` is emitting 
+        value (not yet complete) and there is no new `Inner Observable` (emitted from the `Outer Observable`), this `Inner Observable`
+        will be completely `skipped` when the old `Inner Observable` has not yet completed
+
+    ```typescript
+    function log(val) {
+        console.log(val + 'emitted');
+        console.log('----------------');
+    }
+    
+    concat(
+        timer(1000).pipe(mapTo('first timer'), tap(log)), // emit 'first timer' after 1s
+        timer(5000).pipe(mapTo('second timer')), tap(log)), // emit 'second timer' after 5s
+        timer(3000).pipe(mapTo('last timer')), tap(log)) // emit 'last timer' after 3s
+    )
+        .pipe(
+            exhaustMap(c => 
+                interval(1000).pipe(
+                    map(v => `${c}: ${v}`),
+                    take(4)
+                )
+            ) // interval(1000) takes 4s to complete
+        ).subscribe(console.log);
+    // after 1s:
+    // first timer emitted!! -- from log()
+    // first timer: 0
+    // first timer: 1
+    // first timer: 2
+    // first timer: 3 -- complete -- 5 seconds passed
+    
+    // second timer emitted -- from log()
+    // second timer: 0
+    // second timer: 1
+    // second timer: 2 -- 3 next seconds passed
+    // last timer emitted -- from log()
+    // second timer: 3 -- complete
+    // NOTHING
+    ```
+
+    -   When `exhaustMap()` is running the `Inner Observable` of the `second timer`, the `Inner Observable` of `last timer` 
+        is skipped and everything is stopped after the `Inner Observable` of `second timer` complete
+    -   `Rate Limiting HOO`
+
+-   `switchMapTo()/concatMapTo()/mergeMapTo()`
+
+    -   These operators take an `Inner Observable` instead of a `projectFunction`
+    -   Use these operators when we do not care about the `Outer Observable` value
+
+    ```typescript
+    fromEvent(document, 'click').pipe(switchMapTo(interval(1000).pipe(take(10))));
+    
+    fromEvent(document, 'click').pipe(mergeMapTo(interval(1000).pipe(take(10))));
+    
+    fromEvent(document, 'click').pipe(concatMapTo(interval(1000).pipe(take(10))));
+    ```
+
+-   `partition()`
+
+    -   `partition<T>(source: any, predicate: (value: T, index: number) => boolean, thisArg?: any): [Observable<T>, Observable<T>]`
+    -   `partition()` is not a `HOO`, but a `Higher Order Function`
+    -   `partition()` takes a `Source` and returns 2 `Destinations`
+    -   `partition()` takes 2 parameters:
+        -   `Source Observable`
+        -   `predicateFunction`: invoke for every value emitted from the `Source Observable`. For each `predicateFunction`
+            parameter, `parition()` will split `Source Observable` into 2 `Destination Observables`: 1 `Observable` with the 
+            value satisfied the `predicateFunction` condition, the othere `Observable` has the value which does not satisfy the condition
+    
+    ```typescript
+    const [even$, odd$] = partition(interval(1000), x => x % 2 === 1);
+    merge(
+        even$.pipe(map(x => `even - ${x}`)),
+        odd$.pipe(map(x => `odd - ${x}`))
+    ).subscribe(observer);
+    // even - 0
+    // odd - 1
+    // even - 2
+    // odd - 3
+    // ...
+    ```
+
+    -   `partition()` is useful when there is a `notification` `WebSocket` from the server and we want to split the data into
+        `readNotification$` and `unreadNotification$` to handle the 2 `Observables` differently
+
+#### Utility Operators
+
+-   `tap()`
+
+    -   `tap<T>(nextOrObserver?: NextObserver<T> | ErrorObserver<T> | CompleteionObserver<T> | ((x: T) => void), error?: 
+        (e: any) => void, complete?: () => void): MonoTYpeOperatorFunction<T>`
+    -   `tap()` takes a parameter like `subscribe`, `observer`, or 3 functions `nextFunction`, `errorFunction` and `completeFunction`
+    -   `tap()` does not return any value and does not mutate the `Observable`
+    -   Use-case:
+    
+        a.  Log the emitted value at any time in the `Observable`
+        
+        ```typescript
+        interval(1000)
+            .pipe(
+                tap(val => console.log('before map: ', val)),
+                map(val => val * 2),
+                tap(val => console.log('after map: ', val))
+            ).subscribe(observer);
+        // before map: 0
+        // after map: 0
+        
+        // before map: 1
+        // after map: 2
+        
+        // before map: 2
+        // after map: 4
+        // ...
+        ```
+
+        b.  Use the emitted value from the `Observale` and mutate that value (`side effect`)
+        c.  Perform a task that has nothing to do with the `Observable` (to `start/stop` the loader)
+
+-   `delay()/delayWhen()`
+
+    -   `delay<T>(delay: number | Date, scheduler: SchedulerLike = async): MonoTypeOperatorFunction<T>`
+    -   `delay()` emits the value of an `Observable` depending on the parameter. When the parameter is a `number`, `delay()` will
+        run a `timer` and then emit the `Observable` value. When the parameter is a `Date`, `delay()` will postpone until that `Date` time
+        that `delay()` emit the `Observable` value
+
+    ```typescript
+    fromEvent(document, 'click').pipe(delay(1000)).subscribe(console.log);
+    
+    // click
+    // 1s -- MouseEvent
+    // click
+    // 1s -- MouseEvent
+    ```
+    
+    -   `delayWhen<T>(delayDurationSelector: (value: T, index: number) => Observable<any>, subscriptionDelay?: Observable<any>): 
+        MonoTypeOperationFunction<T>`
+    -   `delayWhen()` takes a `function` and returns an `Observable`
+    -   `delayWhen()` will delay emitting the `Source Observable` value until the passed `Observable` emits value
+    
+    ```typescript
+    fromEvent(document, 'click')
+        .pipe(delayWhen(() => timer(1000)))
+        .subscribe(console.log);
+    // click
+    // 1s - MouseEvent
+    // click
+    // 1s - MouseEvent
+    ```
+
+-   `finalize()`
+
+    -   `finalize<T>(callback: () => void): MonoTypeOperatorFunction<T>`
+    -   `finalize()` takes a `callback` as parameter
+    -   The `callback` will execute when the `Observable` `complete` or `error`
+    -   `finalize()` is often use to stop the loading spinner
+    
+    ```typescript
+    this.loading = true;
+    this.apiService
+        .get()
+        .pipe(finalize(() => this.loading = false))
+        .subscribe();
+    ```
+
+-   `repeat()`
+
+    -   `repeat<T>(count: number = -1): MonoTypeOperatorFunction<T>`
+    -   `repeat()` takes a `count` parameter and will `repeat` the `Source Observable` witn `count` times
+    
+    ```typescript
+    of('repeated data').pipe(repeat(3)).subscribe(console.log);
+    // 'repeated data'
+    // 'repeated data'
+    // 'repeated data'
+    ```
+
+-   `timeInterval()`
+
+    -   `timeInterval<T>(scheduler: SchedulerLike = async): OperatorFunction<T, TimeInterval<T>>`
+    -   `timerInterval()` is used to calculate the time duration between emitting value time of the `Source Observable`
+    -   `timeInterval()` will run at soon as the `Observable` is `subscribed`, `timeInterval()` can calculate the duration from `subscribing` until the first emission
+    
+    ```typescript
+    fromEvent(document, 'click').pipe(timeInterval()).subscribe(console.log);
+    // click
+    // TimeInterval {value: MouseEvent, interval: 1000} // it takes 1s from subscribing to the first click
+    ```
+
+-   `timeout()`
+
+    -   `timeout<T>(due: number | Date, scheduler: SchedulerLike = async): MonoTypeOperatorFunction<T>`
+    -   `timeout()` takes a `number` or `Date` as parameter
+    -   `timeout()` will throw an error when the `Source Observable` does not emit any value during the mentioned time
+        (when the parameter is a `number`), or until the `Date` time (parameter is a `Date`)
+    
+        ```typescript
+        interval(2000).pipe(timeout(1000)).subscribe(console.log, console.error);
+        // Error { name: "TimeoutError" }
+        ```
+    
+-   `timeoutWith()`
+    
+    -   `timeoutWith<T, R>(due: number | Date, withObservable: any, scheduler: SchedulerLike = async): OperatorFunction<T, T | R>`
+    -   `timeoutWith()` has another parameter `Observable`. When the `Source Observable` emit the value too late compared to `due`,
+        `timeoutWith()` will subscribe to the other `Observable` instead of throw an `error`
+        
+-   `toPromise()`
+    
+    -   `toPromise()` will be `deprecated` in `RxJS v7`
+    
+    ```typescript
+    async function test() {
+        const helloWorld = await of('hello')
+            .pipe(map(val => val + 'world'))
+            .toPromise();
+        console.log(helloWorld); // hello world
+    }
+    ```
