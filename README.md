@@ -2220,7 +2220,7 @@ Creator operators can be called as normal function. `Pipeable` operators will be
         () => subscribeToFirst,
         of('first'),
         of('second'))
-    );
+    )
     
     subscribeToFirst = true;
     firstOrSecond.subscribe(value => console.log(value));
@@ -2636,3 +2636,901 @@ Creator operators can be called as normal function. `Pipeable` operators will be
         console.log(helloWorld); // hello world
     }
     ```
+
+## Day 26: RxJS Subjeect and Multicasting
+
+-   Observable Execution
+
+    -   There will be a new `execution` created for each `subscribe`
+
+    ```typescript
+    const observbvable = interval(500).pipe(
+        take(5)
+    );
+    
+    const observerA = {
+        next: val => console.log(`Observer A: ${val}`),
+        error: err => console.log(`Observer A error: ${err}`),
+        complete: () => console.log(`Observer A complete`)
+    };
+    
+    observable.subscribe(observerA);
+    /** output
+    Observer A: 0
+    Observer A: 1
+    Observer A: 2
+    Observer A: 3
+    Observer A: 4
+    Observer A complete
+    */
+    ```
+ 
+    Subscribe to another observer after 2s
+
+    ```typescript
+    const observable = interval(500).pipe(
+        take(5)
+    );
+
+    const observerA = {
+        next: val => console.log(`Observer A: ${val}`),
+        error: err => console.log(`Observer A error: ${err}`),
+        complete: () => cosnole.log(`Observer A complete`)
+    };
+    
+    observable.subscribe(observerA);
+    
+    const observerB = {
+        next: val => console.log(`Observer B: ${val}`),
+        error: err => console.log(`Observer B error: ${err}`),
+        complete: () => console.log('Observer B complete')
+    };
+    
+    setTimeout(() => {
+        observable.subscribe(observerB);
+    }, 2000);
+    
+    /**
+    Output
+    Observer A: 0
+    Observer A: 1
+    Observer A: 2
+    Observer A: 3
+    Observer A: 4
+    Observer A complete
+    Observer B: 0
+    Observer B: 1
+    Observer B: 2
+    Observer B: 3
+    Observer B: 4
+    Observer B complete
+    */
+    ```
+
+    -   Hybrid observer to share execution for new `subscribe`
+
+    ```typescript
+    const hybridObserver = {
+        observers: [],
+        registerObserver(observer) {
+            this.observers.push(observer);
+        },
+        next(value) {
+            this.observers.forEach(observer => observer.next(value));
+        },
+        error(err) {
+            this.observers.forEach(observer => observer.error(err));
+        },
+        complete() {
+            this.observers.forEach(observer => observer.complete());
+        }
+    }
+    
+    hybridObserver.registerObserver(observerA);
+    
+    observable.subscribe(hybridObserver);
+    
+    setTimeout(() => {
+        hybridObserver.registerObserver(observerB);
+    }, 2000);
+    /**
+    Output
+    Observable A: 0
+    Observable A: 1
+    Observable A: 2
+    Observable A: 3
+    Observable A: 4
+    Observable B: 4
+    Observable A complete
+    Observable B complete
+    */
+    ```
+
+    ```typescript
+    const hybridObserver = {
+        observers: [],
+        subscribe(observer) {
+            this.observers.push(observer);
+        },
+        next(value) {
+            this.observers.forEach(observer => observer.next(value));
+        },
+        error(err) {
+            this.observers.forEach(observer => observer.error(err));
+        },
+        complete() {
+            this.observers.forEach(observer => observer.complete());
+        }
+    }
+    
+    hybridObserver.subscribe(observerA);
+    
+    observable.subscribe(hybridObserver);
+    
+    setTimeout(() => {
+        hybridObserver.subscribe(observer);
+    }, 2000);
+    ```
+
+    -   `hybridObserver` is similar to an `Observable` as well as an `observer`
+    -   `hybridObserver` is a `Subject` in `RxJS`
+    -   A `Subject` is a special type of `Observable` that allows values to be multicasted to many `Observers`. `Subjects` are like `EventEmitters`
+    -   Every `Subject` is an `Observable` and an `Observer`. You can subscribe to a `Subject`, and you can call next to feed values as well as error and complete
+
+    ```typescript
+    const subject = new Subject();
+    subject.subscribe(observerA);
+    observable.subscribe(subject);
+    
+    setTimeout(() => {
+        subject.subscribe(observerB);
+    }, 2000);
+    ```
+
+    -   We have just transformed an univast `Observable` execution to a `multicast` one, by using `Subject`
+        -   `unicast`: normal Youtube video, each person watch the whole video
+        -   `multicast`: Youtube live, all people watch the same video, at the same time
+
+-   `Subject`
+
+    -   type ahead example
+    ```typescript
+    @Component({
+        selector: 'my-app',
+        templateUrl: './app.component.html',
+        styleUrls: ['./app.component.css']
+    })
+    export class AppComponent implements OnInit {
+        
+        searchTerm$ = new Subject<string>();
+    
+        ngOnInit() {
+            this.searchTerm$.asObservable().pipe(
+                throttleTime(250, undefined, {
+                    leading: true,
+                    trailing: true,
+                }),
+                distinctUntilChanged(),
+            ).subscribe(
+                next: value => console.log(value)
+            )       
+        };
+    }
+    
+    onInput(event: Event) {
+        const target = event.target as HTMLInputElement;
+        this.searchTerm$.next(target.value);
+    }
+    ```
+
+-   `BehaviorSubject`
+
+    -   When working with `Subject`, late subscriber will not receive emitted values in the past
+    -   `behaviorSubject` does store the last valuee as current value
+    
+    ```typescript
+    const subject = new Subject();
+    
+    subject.subscribbe({
+        next: v => console.log('observerA: ', v)
+    });
+    
+    subject.next(1);
+    subject.next(2);
+    
+    subject.subscribe({
+        next: v => console.log('observerB: ', v)
+    });
+    
+    subject.next(3);
+    /**
+    Output
+    observerA: 1
+    observerA: 2
+    observerA: 3
+    observerB: 3
+    */
+    ```
+
+    -   `BehaviorSubject` stores emitted values and will emit those values to the latest `Observable` when a new `observer` `subscribe`
+    -   A variant of `Subject` that requires an initial value and emits its current value whenever it is subscribed to
+    -   `BehaviorSubject` are useful for representing 'value over time'. For instance, an event stream of birthday is a `Subject`,
+        but the stream of a person's age would be a `BehaviorSubject`
+    -   Note: `BehaviorSubject` requires initial value when initialize the subject
+
+    ```typescript
+    const subject = new BehaviorSubject(0): // 0 is the initial value
+    
+    subject.subscribe({
+        next: v => console.log('observerB: ', v)
+    });
+    
+    subject.next(3);
+    /**
+    Output
+    observerA: 0
+    observerA: 1
+    observerA: 2
+    observerB: 2
+    observerA: 3
+    observerB: 3
+    */
+    ```
+
+-   `ReplaySubject`
+
+    -   `ReplaySubject` can send emitted values to new `Observer`, `replaySubject` can also stores many values (even all values)
+    -   Parameters:
+        -   `buffer`: the number of items to store
+        -   `windowTIme`: (ms) maximum time duration from the latest value emitting
+    -   A variant of `Subject` that 'replays' or emits old values to new subscribers. It buffers a set of number of values 
+        and will emit those values immediately to any new subscribers in addition to emitting new values to existing subscribers
+
+    ```typescript
+    cosnt subject = new ReplaySubject(3); // buffer 3 valeus for new subscribers
+    
+    subject.subscribe({
+        next: v => console.log('observerA: ', v)
+    });
+    
+    subject.next(1);
+    subject.next(2);
+    subject.next(3);
+    subject.next(4);
+    
+    subject.subscribe({
+        next: v => console.log('observerB: ', v)
+    });
+    
+    subject.next(3);
+    
+    /**
+    Output
+    observerA: 1
+    observerA: 2
+    observerA: 3
+    observerA: 4
+    observerB: 2
+    observerB: 3
+    observerB: 4
+    observerA: 5
+    observerB: 5
+    */
+    ```
+
+    -   Or, using with `windowTime`
+
+    ```typescript
+    const subject = new ReplaySubject(100, 500); // windowTime
+    
+    subject.subscribe({
+        next: v => console.log('observerA: ', v)
+    });
+    
+    let i = 1;
+    const id = setInterval(() => subject.next(i++), 200);
+    
+    setTimeout(() => {
+        subject.subscribe({
+            next: v => console.log('observerB: ', v)
+        });
+    }, 1000);
+    
+    setTimeout(() => {
+        subject.complete();
+        clearInterval(id);
+    }, 2000);
+    
+    /**
+    Output
+    observerA: 1
+    observerA: 2
+    observerA: 3
+    observerA: 4
+    observerA: 5
+    observerB: 3
+    observerB: 4
+    observerB: 5
+    observerA: 6
+    observerB: 6
+    ...
+    */
+    ```
+
+-   `AsyncSubject`
+
+    -   Emits the last value of the `Observable` execution to the `observers`, only when execution complete
+    -   A variant of `Subject` that only emits a value when it completes. It will emits its latest value to all its observers on completion
+    -   There will be no emission if the stream does not complete
+
+    ```typescript
+    const subject = new AsyncSubject();
+    
+    subject.subscribe({
+        next: v => console.log('observerA: ', v)
+    });
+    
+    subject.next(1);
+    subject.next(2);
+    subject.next(3);
+    subject.next(4);
+    
+    subject.subscribe({
+        next: v => console.log('observerB: ', v)
+    });
+    
+    subject.next(5);
+    subject.complete();
+    
+    /**
+    Output
+    observerA: 5
+    observerB: 5
+    */
+    ```
+
+-   `Subject Completion`
+
+    -   When `BehaviorSubject` completes, `observers` that subscribe to it later will only receive complete signal
+    -   When `ReplaySubject` complete, `observers` that subscribe to it will then get all the values stored from `buffer`, then execute the observers `complete`
+    -   When `AsyncSubject` complete, `observer` can still subscribe to it and receive the last value
+
+    ```typescript
+    const subject = new BehaviorSubject(0); // 0 is the initial value
+    
+    subject.subscribe({
+        next: v => console.log('observerA: ', v),
+        complete: () => console.log('observerA complete')
+    });
+    
+    subject.next(1);
+    subject.next(2);
+    
+    subject.subscribe({
+        next: v => console.log('observerB: ', v),
+        complete: () => console.log('observerB complete')
+    });
+    
+    subject.next(3);
+    sdubject.complete();
+    
+    subject.subscribe({
+        next: v => console.log('observerC: ', v),
+        complete: () => console.log('observerC complete')
+    });
+    /**
+    Output
+    observerA: 0
+    observerA: 1
+    observerA: 2
+    observerB: 2
+    observerA: 3
+    observerB: 3
+    observerA complete
+    observerB complete
+    observerC complete
+    */
+    ```
+
+    ```typescript
+    const subject = new ReplaySubject(3);
+    
+    subject.subscribe({
+        next: v => console.log('observerA: ', v),
+        complete: () => console.log('observerA complete')
+    });
+    
+    let i = 1;
+    const id = setInterval(() => subject.next(i++), 200);
+    
+    setTimeout(() => {
+        subject.complete();
+        clearInterval(id);
+        subject.subscribe({
+            next: v => console.log('observerB: ', v),
+            complete: () => console.log('observerB complete')
+        });
+    }, 1000);
+    /**
+    Output
+    observerA: 1
+    observerA: 2
+    observerA: 3
+    observerA: 4
+    observerA: 5
+    observerA complete
+    observerB: 3
+    observerB: 4
+    observerB: 5
+    observerB complete
+    */
+    ```
+
+    ```typescript
+    const subject = new AsyncSubject();
+    
+    subject.subscribe({
+        next: v => console.log('observerA: ', v),
+        complete: () => console.log('observerA complete')
+    });
+    
+    subject.next(1);
+    subject.next(2);
+    subject.next(3);
+    subject.next(4);
+    subject.next(5);
+    
+    subject.complete();
+    
+    subject.subscribe({
+        next: v => console.log('observerB: ', v),
+        complete: () => console.log('observerB complete')
+    });
+    
+    /**
+    observerA: 5
+    observerA complete
+    observerB: 5
+    observerB complete
+    */
+    ```
+
+-   `Multicasting`
+
+    -   Two or more `observers` have the same execution
+
+    ```typescript
+    const observable = interval(500).pipe(
+        take(5)
+    );
+    
+    const subject = new Subject();
+    
+    const observerA = {
+        next: val => console.log('observerA: ', val),
+        error: err => console.log('observerA error: ', err),
+        complete: () => console.log('observerA complete'),
+    };
+    
+    const observerB = {
+        next: val => console.log('observerB: ', val),
+        error: err => console.log('observerB error: ', err),
+        complete: () => console.log('observerB complete'),
+    };
+    
+    subject.subscribe(observerA);
+    
+    observable.subscribe(subject);
+    
+    setTimeout(() => {
+        subject.subscribe(observerB);
+    }, 2000);
+    ```
+
+-   `multicast`
+
+    -   `multicast<T, R>(subjectOrSubjectFactory: Subject<T> | () => Subject<T>), selector?: (source: Observable<T>) =>
+        Observable<R>): OperatorFunction<T, R>`
+    -   Returns an `Observable` that emits the reulst of invoking a specicied selector on items emitted by a `ConnectableObservable`
+        that shares a single subscription to the underlying stream
+    -   This operator will return an `Observable`, especially `ConnectableObservable` which can share the same `execution`
+
+    ```typescript
+    const subject = new Subject();
+    
+    const connectableObservable = interval(500).pipe(
+        take(5),
+        multicast(subject)
+    ) as ConnectableObservable<number>;
+    
+    const observerA = { 
+        next: val => console.log('observerA: ', val),
+        error: err => console.log('observerA error: ', err),
+        complete: () => console.log('observerA complete')
+    };
+    
+    
+    const observerB = { 
+        next: val => console.log('observerB: ', val),
+        error: err => console.log('observerB error: ', err),
+        complete: () => console.log('observerB complete')
+    };   
+    
+    connectableObservable.subscribe(observerA);
+    connectableObservable.connect();
+    
+    setTimeout(() => {
+        connectableObservable.subscribe(observerB);
+    }, 2000);
+    
+    /**
+    Ouput
+    observerA: 0
+    observerA: 1
+    observerA: 2
+    observerA: 3
+    observerA: 4
+    observerB: 4
+    observerA complete
+    observerB complete
+    */
+     ```
+
+    -   `multicast` takes a `subjectOrSubjectFactory` as a parameter (`Subject` in the example). Then, it will return a 
+        `ConnectableObservable` which has some special methods
+    -   `ConnectableObservable` is an `Observable`. We can `subscribe` to it, however, we need to call `connect` to execute the `Observable`
+    `connectableObservable.connect() === observable.subscribe(observer)`
+
+    ```typescript
+    const subject = new Subject();
+    
+    const connectableObservable = interval(500).pipe(
+        tap(x => console.log('log.info: ', x)),
+        multicast(subject)
+    ) as ConnectableObservable<number>;
+    
+    const observerA = {
+        next: val => console.log('observerA: ', val),
+        error: err => console.log('observerA error: ', err),
+        complete: () => console.log('observerA complete')
+    };
+    
+    const observerB = {
+           next: val => console.log('observerB: ', val),
+           error: err => console.log('observerB error: ', err),
+           complete: () => console.log('observerB complete')
+    };
+    
+    const sub = connectableObservable.subscribe(observerA);
+    connectableObservable.connect();
+    
+    setTimeout(() => {
+        sub.add(connectableObservable.subscribe(observerB));
+    }, 2000);
+    
+    setTimeout(() => {
+        sub.unsubscribe();
+    }, 3000);
+    
+    /**
+    Ouput
+    log.info: 0
+    observerA: 0
+    log.info: 1
+    observerA: 1
+    log.info: 2
+    observerA: 2
+    log.info: 3
+    observerA: 3
+    log.info: 4
+    observerA: 4
+    observerB: 4
+    log.info: 5
+    observerA: 5
+    observerB: 5
+    log.info: 6
+    log.info: 7
+    log.info: 8
+    log.info: 9
+    log.info.10
+    ...
+    */
+    ```
+
+    -   Returned `subscription` need to be stored for the `connect()` to be able to `unsubscribe`
+
+    ```typescript
+    const sub = connectableObservable.subscribe(observerA);
+    const connectSub = connectableObservable.connect();
+    
+    setTimout(() => {
+        sub.add(connectableObservable.subscribe(observerB));
+    }, 2000);
+    
+    setTimeout(() => {
+        sub.unsubscribe();
+        connectSub.unsubscribe();
+    }, 3000);
+    ```
+
+    -   Just execute `connectSub.unsubscribe()`, no need to call `sub.unsubscribe()`
+
+-   `refCount`
+
+    -   Manually `connecting` and `disconnecting` is not a good practice
+    -   `connectableObservable` has a protocol: when the number of `Observable` changes from `0` to `1`, `connect` will be invoked automatically,
+    `unsubscribe` will be called when the number changes from `1` to `0`
+
+    ```typescript
+    const subject = new Subject();
+    
+    const connectableObservable = interval(500).pipe(
+        tap(x => console.log('log.info ', x)),
+        multicast(subject)
+    ) as ConnectableObservable<number>;
+    
+    const observerA = {
+        next: val => console.log('observerA: ', val),
+        error: err => console.log('observerA error: ', err),
+        complete: () => console.log('observerA complete')
+    };
+        
+    const observerB = {
+        next: val => console.log('observerB: ', val),
+        error: err => console.log('observerB error: ', err),
+        complete: () => console.log('observerB complete')
+    };
+    
+    cosnt observable = connectableObservable.refCount();
+    
+    const subA = observable.subscribe(observableA); // ref from 0 -> 1
+    
+    let subB;
+    setTimeout(() => {
+        subB = observable.subscribe(observerB); // ref from 1 -> 2
+    }, 2000);
+    
+    setTimeout(() => {
+        subA.unsubscribe(); // ref from 2 -> 1
+    }, 3000);
+    
+    setTimeout(() => {
+        subB.unsubscribe(); // ref from 1 -> 0
+    }, 5000);
+    ```
+
+-   `subjectFactory`
+
+    -   When the `Subject` `complete` and `next` is not allowed, we cannot have `execution` triggered anymore
+
+    ```typescript
+    const connectableObservable = interval(500).pipe(
+        take(10),
+        tap(x => console.log('log.info: ', x)),
+        multicast(new Subject())
+    ) as ConnectableObservable<number>;
+    
+    const observerA = {
+        next: val => console.log('observerA: ', val),
+        error: err => console.log('observerA error: ', err),
+        complete: () => console.log('observerA complete')
+    };
+            
+    const observerB = {
+        next: val => console.log('observerB: ', val),
+        error: err => console.log('observerB error: ', err),
+        complete: () => console.log('observerB complete')
+    };
+    
+    const sharedObservable = connectableObservable.refCount();
+    
+    const subA = sharedObservable.subscribe(observerA);
+    
+    let subB;
+    setTimeout(() => {
+        subB = sharedObservable.subscribe(observerB);
+    }, 2000);
+    
+    setTimeout(() => {
+        const subA2 = sharedObservable.subscribe(observerA);
+    }, 6000);
+    ```
+
+    -   After 5s, `sharedObservable` did emit `complete`. At 6s, after subscribing, the `Observable` cannot receive value
+    -   We have to create a new `Subject`
+
+    ```typescript
+    const connectableObservable = interval(500).pipe(
+        take(10),
+        tap(x => console.log('log.info: ', x)),
+        multicast(() => new Subject())
+    ) as ConnectableObservable<number>;
+    ```
+
+    -   `SubjectFactory` is a function which returns a new `Subject` on execution
+    -   Will be called when `refCount` changes from `0` to `1`
+
+    ```typescript
+    const sharedObservable = connectableObservable.refCount();
+    
+    const subA = sharedObservable.subscribe(observerA);
+    
+    let subB;
+    setTimeout(() => {
+      subB = sharedObservable.subscribe(observerB);
+    }, 2000);
+    
+    setTimeout(() => {
+      const subA2 = sharedObservable.subscribe(observerA);
+    }, 6000);
+    ```
+
+-   `publish`
+
+    -   `publish<T, R>(selector?: OperatorFunction<T, R>): MonoTypeOperatorFunction<T> | OperationFunction<T, R>`
+    -   Returns a ConnectableObservable, which is a variety of `Observable` that waits until its conenct method is called 
+        before it begins emitting items to thoes `Observers` that have subscribed to its
+
+    ```typescript
+    const connectableObservable = interval(500).pipe(
+      tap(x => console.log('log.info: ' + x)),
+      publish(),
+    ) as ConnectableObservable<number>;
+    
+    const observerA = {
+      next: (val) => console.log(`Observer A: ${val}`),
+      error: (err) => console.log(`Observer A Error: ${err}`),
+      complete: () => console.log(`Observer A complete`),
+    };
+    
+    const observerB = {
+      next: (val) => console.log(`Observer B: ${val}`),
+      error: (err) => console.log(`Observer B Error: ${err}`),
+      complete: () => console.log(`Observer B complete`),
+    };
+    
+    const sharedObservable = connectableObservable.refCount();
+    
+    const subA = sharedObservable.subscribe(observerA); // ref from 0 -> 1
+    
+    let subB;
+    setTimeout(() => {
+        subB = sharedObseravble.subscribe(observerB); // ref from 1 -> 2
+    }, 2000);
+    
+    setTimeout(() => {
+        subA.unsubscribe(); // ref from 2 -> 1
+    }, 3000);
+    
+    setTimeout(() => {
+        subB.unsubscribe(); // ref from 1 -> 0
+    }, 5000);
+    ```
+
+    -   `BehaviorSubject` => `publishBehavior`
+    -   `ReplaySubject` => `publishReplay`
+    -   `AsyncSubject` => `publishLast`
+
+-   `share`
+
+    -   `share<T>(): MonoTypeOperatorFunction<T>`
+    -   Returns a new `Observable` that multicast (shares) the original `Observable`. As long as there is at least one `subscriber`
+        this `observable` will be subscribed and emitting data. When all subscribers have unsubscribed it will unsubscribe from
+        the source `observable`. Because the `Observable` is multicasting it makes the stream hot. This is an alias for 
+        `multicast(() => new Subject()), refCOunt()`
+    
+    ```typescript
+    const sharedObservable = interval(500).pipe(
+      tap(x => console.log('log.info: ' + x)),
+      share(),
+    );
+    
+    const observerA = {
+      next: (val) => console.log(`Observer A: ${val}`),
+      error: (err) => console.log(`Observer A Error: ${err}`),
+      complete: () => console.log(`Observer A complete`),
+    };
+    
+    const observerB = {
+      next: (val) => console.log(`Observer B: ${val}`),
+      error: (err) => console.log(`Observer B Error: ${err}`),
+      complete: () => console.log(`Observer B complete`),
+    };
+    
+    const subA = sharedObservable.subscribe(observerA); // ref from 0 => 1
+    
+    let subB;
+    setTimeout(() => {
+      subB = sharedObservable.subscribe(observerB); // ref from 1 => 2
+    }, 2000);
+    
+    setTimeout(() => {
+      subA.unsubscribe(); // ref from 2 => 1
+    }, 3000);
+    
+    setTimeout(() => {
+      subB.unsubscribe(); // ref from 1 => 0
+    }, 5000);
+    ```
+
+-   `shareReplay`
+
+    -   `shareReplay<T>(configOrBufferSize?: number | ShareReplayConfig, windowTime?: number, scheduler?: SchedulerLike): MonoTypeOperatorFunction<T>`
+    -   Shares source and replay specified number of emissions on subscription
+    -   This operator is a specialization of `replay` that connects to a source `observable` and multicasts throgh a `ReplaySubject`
+        constructed with the specified arguments. A successfully completed source will stay cached in the `shareReplay` `observable` forever, 
+        but an errored source can be retied
+
+    -   You generally want to use `shareReplay` when you have side-effects or taxing computations that you do not wish to be executed
+        amongst multiple subscribers. It may also be valuable in situations where you know you will have the late subscribers to 
+        a stream that need access to previously emitted values. This ability to replay values on subscription is what differentiates `share` and `shareReplay`
+
+    ```typescript
+    import { Injectable } from '@angular/core';
+    import { HttpClient } from '@angular/common/http';
+    import { Observable } from 'rxjs/Observable';
+    import { Subject } from 'rxjs/Subject';
+    import { timer } from 'rxjs/observable/timer';
+    import { switchMap, shareReplay, map, takeUntil } from 'rxjs/operators';
+    
+    export interface Joke {
+      id: number;
+      joke: string;
+      categories: Array<string>;
+    }
+    
+    export interface JokeResponse {
+      type: string;
+      value: Array<Joke>;
+    }
+    
+    const API_ENDPOINT = 'https://api.icndb.com/jokes/random/5?limitTo=[nerdy]';
+    const REFRESH_INTERVAL = 10000;
+    const CACHE_SIZE = 1;
+    
+    @Injectable()
+    export class JokeService {
+      private cache$: Observable<Array<Joke>>;
+      private reload$ = new Subject<void>();
+    
+      constructor(private http: HttpClient) { }
+    
+      // This method is responsible for fetching the data.
+      // The first one who calls this function will initiate 
+      // the process of fetching data.
+      get jokes() {
+        if (!this.cache$) {
+          // Set up timer that ticks every X milliseconds
+          const timer$ = timer(0, REFRESH_INTERVAL);
+              
+          // For each timer tick make an http request to fetch new data
+          // We use shareReplay(X) to multicast the cache so that all 
+          // subscribers share one underlying source and don't re-create 
+          // the source over and over again. We use takeUntil to complete
+          // this stream when the user forces an update.
+          this.cache$ = timer$.pipe(
+            switchMap(() => this.requestJokes()),
+            takeUntil(this.reload$),
+            shareReplay(CACHE_SIZE)
+          );
+        }
+    
+        return this.cache$;
+      }
+    
+      // Public facing API to force the cache to reload the data
+      forceReload() {
+        this.reload$.next();
+        this.cache$ = null;
+      }
+    
+      // Helper method to actually fetch the jokes
+      private requestJokes() {
+        return this.http.get<JokeResponse>(API_ENDPOINT).pipe(
+          map(response => response.value)
+        );
+      }
+    }
+    ```
+
+

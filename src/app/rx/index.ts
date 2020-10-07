@@ -13,7 +13,7 @@ import {
     merge,
     Observable,
     of, partition,
-    race,
+    race, ReplaySubject,
     Subject,
     throwError,
     timer,
@@ -51,7 +51,7 @@ import {
     skip,
     skipUntil,
     skipWhile,
-    startWith,
+    startWith, switchMapTo,
     take,
     takeLast,
     takeUntil,
@@ -606,8 +606,111 @@ const [even$, odd$] = partition(interval$, val => val % 2 === 0);
 even$.pipe(
     tap(val => console.log('before: ', val)),
     map(val => val * 2),
-    tap(val => console.log('after: ', val))
+    tap(val => console.log('after: ', val)),
 );
+
+const createObserver = observer => ({
+    next: val => console.log(observer, val),
+    error: err => console.error(observer, err),
+    complete: () => console.log(observer, ' complete'),
+});
+
+const subject = new Subject();
+
+subject.subscribe(createObserver('a'));
+subject.next('hello');
+subject.next('world');
+
+subject.subscribe(createObserver('b'));
+
+subject.next('this will be received by both A and B');
+
+const loadingSubject = new Subject();
+
+function getUsers() {
+    loadingSubject.next(true);
+    return timer(3000).pipe(switchMapTo(of('user')), finalize(() => {
+        loadingSubject.next(false);
+    }));
+}
+
+loadingSubject.subscribe(createObserver('component'));
+
+getUsers().subscribe();
+
+const behaviorSubject = new BehaviorSubject('hello');
+
+let a;
+behaviorSubject.subscribe(val => {
+    a = val;
+});
+console.log(a); // output: 'hello'
+
+
+behaviorSubject.subscribe(createObserver('a'));
+
+behaviorSubject.next('world');
+
+behaviorSubject.subscribe(createObserver('b'));
+
+console.log(behaviorSubject.value);
+
+behaviorSubject.subscribe(val => {
+    a = val;
+});
+
+console.log(a); // output: 'world
+
+// permissionSubject: BehaviorSubject;
+//
+// fucntion hasPermission$() {
+//     return permissionSubject.pipe(map);
+// }
+//
+// function hasPermission() {
+//     let hasPermission = false;
+//     hasPermission$.subscribe(permission => {
+//         hasPermission = permission;
+//     })
+//
+//     return hasPermission;
+// }
+
+// replaySubject
+const replaySubject = new ReplaySubject(2);
+
+replaySubject.subscribe(val => {
+    // console.log({a}); // undefined
+    a = val;
+});
+
+console.log({ a }); // undefined
+
+replaySubject.next('hello');
+
+let b;
+
+replaySubject.subscribe(val => {
+    console.log({val});
+    b = val;
+});
+
+console.log({b}); // 'hello'
+
+replaySubject.subscribe(createObserver('a'));
+
+replaySubject.next('hello');
+
+
+replaySubject.next('world');
+replaySubject.next('!!!');
+
+replaySubject.subscribe(createObserver('b'));
+
+
+
+
+
 
 
 
