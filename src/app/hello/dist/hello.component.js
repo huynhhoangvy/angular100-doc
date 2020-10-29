@@ -1,11 +1,12 @@
 'use strict';
-var __decorate = (this && this.__decorate) || function ( decorators, target, key, desc ) {
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length,
         r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if ( typeof Reflect === 'object' && typeof Reflect.decorate === 'function' ) {
         r =
             Reflect.decorate(decorators, target, key, desc);
-    } else {
+    }
+    else {
         for ( var i = decorators.length - 1; i >= 0; i-- ) {
             if ( d = decorators[i] ) {
                 r =
@@ -45,7 +46,7 @@ var HelloComponent = /** @class */ (function () {
         this.active = true;
         this.number = 15;
         this.stringClass = 'class-1 class-2';
-        this.arrayClass = [ 'aclass-1', 'aclass-2' ];
+        this.arrayClass = ['aclass-1', 'aclass-2'];
         this.objectClass = {
             foo: true,
             bar: false,
@@ -53,7 +54,7 @@ var HelloComponent = /** @class */ (function () {
             baz: true,
         };
         this.stringStyle = 'width: 100%; height: 100%';
-        this.arrayStyle = [ 'width', '100px' ];
+        this.arrayStyle = ['width', '100px'];
         this.objectStyle = {
             display: 'flex',
             'align-items': 'center',
@@ -70,7 +71,7 @@ var HelloComponent = /** @class */ (function () {
         core_1.Component({
             selector: 'app-hello',
             templateUrl: './hello.component.html',
-            styleUrls: [ './hello.component.scss' ],
+            styleUrls: ['./hello.component.scss'],
         }),
     ], HelloComponent);
     return HelloComponent;

@@ -5,7 +5,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 
 export class AdultPipe implements PipeTransform {
-    transform( value ) {
+    transform(value) {
         return value.filter(x => x.age > 18);
     }
 }

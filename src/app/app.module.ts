@@ -17,6 +17,10 @@ import { TabBsGroupComponent } from './tab/tab-bs-group.component';
 import { CounterComponent } from './counter/counter.component';
 import { TabContentDirective } from './tab/tab-content.directive';
 import { FormatAddressPipe } from './format-address.pipe';
+import { ArticleListComponent } from './article-list/article-list.component';
+import { ArticleDetailsComponent } from './article-details/article-details.component';
+import { HomeComponent } from './home/home.component';
+import { ChildHomeComponent } from './home/child-home/child-home.component';
 
 @NgModule({
     declarations: [
@@ -34,10 +38,14 @@ import { FormatAddressPipe } from './format-address.pipe';
         TabContentDirective,
         FormatAddressPipe,
         AdultPipe,
+        ArticleListComponent,
+        ArticleDetailsComponent,
+        HomeComponent,
+        ChildHomeComponent,
     ],
-    imports: [ BrowserModule, AppRoutingModule, FormsModule ],
+    imports: [BrowserModule, AppRoutingModule, FormsModule],
     providers: [],
-    bootstrap: [ AppComponent ],
+    bootstrap: [AppComponent],
 })
 export class AppModule {
 }

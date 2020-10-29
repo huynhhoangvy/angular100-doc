@@ -2828,7 +2828,7 @@ Creator operators can be called as normal function. `Pipeable` operators will be
     -   When working with `Subject`, late subscriber will not receive emitted values in the past
     -   `behaviorSubject` does store the last valuee as current value
     
-    ```typescript
+    ```typescriptgg
     const subject = new Subject();
     
     subject.subscribbe({

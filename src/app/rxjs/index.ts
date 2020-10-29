@@ -12,8 +12,10 @@ import {
     interval,
     merge,
     Observable,
-    of, partition,
-    race, ReplaySubject,
+    of,
+    partition,
+    race,
+    ReplaySubject,
     Subject,
     throwError,
     timer,
@@ -51,11 +53,13 @@ import {
     skip,
     skipUntil,
     skipWhile,
-    startWith, switchMapTo,
+    startWith,
+    switchMapTo,
     take,
     takeLast,
     takeUntil,
-    takeWhile, tap,
+    takeWhile,
+    tap,
     throttleTime,
     throwIfEmpty,
     toArray,
@@ -691,11 +695,11 @@ replaySubject.next('hello');
 let b;
 
 replaySubject.subscribe(val => {
-    console.log({val});
+    console.log({ val });
     b = val;
 });
 
-console.log({b}); // 'hello'
+console.log({ b }); // 'hello'
 
 replaySubject.subscribe(createObserver('a'));
 

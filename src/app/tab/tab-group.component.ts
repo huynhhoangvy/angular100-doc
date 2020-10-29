@@ -63,13 +63,13 @@ export class TabGroupComponent implements AfterContentInit {
         this.tabPanels.changes.subscribe(console.log);
     }
 
-    addTab( tab: TabPanelComponent ) {
-        this.tabPanelList = [ ...this.tabPanelList, tab ];
+    addTab(tab: TabPanelComponent) {
+        this.tabPanelList = [...this.tabPanelList, tab];
     }
 
-    removeTab( tab: TabPanelComponent ) {
+    removeTab(tab: TabPanelComponent) {
         let found = -1;
-        this.tabPanelList = this.tabPanelList.filter(( tp, index ) => {
+        this.tabPanelList = this.tabPanelList.filter((tp, index) => {
             if ( tp === tab ) {
                 found = index;
                 return false;

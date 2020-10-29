@@ -1,0 +1,10 @@
+<p>home works!</p>
+<ul>
+    <li *ngFor="let article of article$ | async" style="border: 1px solid black; padding: 20px; margin-bottom: 20px">
+        {{article.title}}
+        <br>
+        <a [routerLink]="['/details/', article.slug]">Read more</a>
+        <a style="cursor: pointer; text-decoration: underline" (click)="onReadMoreClick(article.slug)">Click to read more</a>
+    </li>
+</ul>
+<router-outlet></router-outlet>

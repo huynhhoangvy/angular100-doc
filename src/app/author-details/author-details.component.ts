@@ -4,7 +4,7 @@ import { Author } from './../authors';
 @Component({
     selector: 'app-author-details',
     templateUrl: './author-details.component.html',
-    styleUrls: [ './author-details.component.scss' ],
+    styleUrls: ['./author-details.component.scss'],
 })
 export class AuthorDetailsComponent implements OnInit {
     @Input() author: Author;

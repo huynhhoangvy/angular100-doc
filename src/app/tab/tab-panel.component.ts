@@ -14,7 +14,7 @@ export class TabPanelComponent implements OnInit, OnDestroy {
     @ViewChild(TemplateRef, { static: true }) implicitBody: TemplateRef<unknown>;
     @ContentChild(TabContentDirective, { static: true, read: TemplateRef }) explicitBody: TemplateRef<unknown>;
 
-    constructor( private tabGroup: TabGroupComponent ) {
+    constructor(private tabGroup: TabGroupComponent) {
     }
 
     get panelBody(): TemplateRef<unknown> {

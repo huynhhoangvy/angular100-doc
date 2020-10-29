@@ -1,11 +1,12 @@
 'use strict';
-var __decorate = (this && this.__decorate) || function ( decorators, target, key, desc ) {
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length,
         r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if ( typeof Reflect === 'object' && typeof Reflect.decorate === 'function' ) {
         r =
             Reflect.decorate(decorators, target, key, desc);
-    } else {
+    }
+    else {
         for ( var i = decorators.length - 1; i >= 0; i-- ) {
             if ( d = decorators[i] ) {
                 r =
@@ -29,13 +30,14 @@ var ProgressBarComponent = /** @class */ (function () {
         get: function () {
             return this._progress;
         },
-        set: function ( val ) {
+        set: function (val) {
             // validation value
             if ( typeof val !== 'number' ) {
                 var progress = Number(val);
                 if ( Number.isNaN(progress) ) {
                     this._progress = 0;
-                } else {
+                }
+                else {
                     this._progress = progress;
                 }
             }
@@ -43,7 +45,7 @@ var ProgressBarComponent = /** @class */ (function () {
         enumerable: false,
         configurable: true,
     });
-    ProgressBarComponent.prototype.ngOnChanges = function ( changes ) {
+    ProgressBarComponent.prototype.ngOnChanges = function (changes) {
         // console.log({progress: this._progress});
         // if ('progress' in changes) {
         //     if (typeof changes['progress'].currentValue !== 'number') {
@@ -71,7 +73,7 @@ var ProgressBarComponent = /** @class */ (function () {
         core_1.Component({
             selector: 'app-progress-bar',
             templateUrl: './progress-bar.component.html',
-            styleUrls: [ './progress-bar.component.scss' ],
+            styleUrls: ['./progress-bar.component.scss'],
         }),
     ], ProgressBarComponent);
     return ProgressBarComponent;

@@ -10,8 +10,8 @@
 <div>
     <button (click)="handleClick()">test</button>
 </div>
-<input [value]="user.name" type="text"/>
-<input [(ngModel)]="user.name" type="text"/>
+<input [value]="user.name" type="text" />
+<input [(ngModel)]="user.name" type="text" />
 <div *ngFor="let author of authors; index as idx">
     {{ idx }} - {{ author.firstName }} {{ author.lastName }}
 </div>

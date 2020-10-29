@@ -1,13 +1,30 @@
 <div class="container">
+    <h3>Day 27: Angular Router</h3>
+    <ul class="nav nav-pills card-header-pills">
+        <li class="nav-item">
+            <a class="nav-link" routerLink="/">Index</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" routerLink="/home">Home</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" routerLink="/home/child">Home child</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" routerLink="/details">Details</a>
+        </li>
+    </ul>
+    <router-outlet></router-outlet>
+    <h3>End Day 27</h3>
+    <hr />
     app component
     <p>
         some text
     </p>
-    <hr/>
-    <hr/>
-
-    <hr/>
-    <hr/>
+    <hr />
+    <hr />
+    <hr />
+    <hr />
     <p>{{ currentDate | date }}</p>
     <p>{{ currentDate | date: "shortDate" }}</p>
     <p>{{ currentDate | date: "mediumDate" }}</p>
@@ -22,7 +39,7 @@
     <p>{{ user | json }}</p>
     <!-- {{ time }} -->
     {{ interval$ | async }}
-    <br/>
+    <br />
     <p>{{ addr | formatAddress: "para1" }}</p>
     Full user list
     <ul>
@@ -34,8 +51,8 @@
     </ul>
 
     <button (click)="addUser()">add user</button>
-    <hr/>
-    <hr/>
+    <hr />
+    <hr />
     <!-- <app-tab-group [(activeIndex)]="currentIndex">
     <app-tab-panel title="First tab">First tab content</app-tab-panel>
     <app-tab-panel title="Second tab">Second tab content</app-tab-panel>
@@ -71,11 +88,11 @@
             </ng-template>
         </app-tab-panel>
     </app-tab-bs-group>
-    <hr/>
-    <hr/>
+    <hr />
+    <hr />
     <div class="card mx-4">
         <div class="card-header">
-            <br/>
+            <br />
             you have selected
             <ng-container [ngTemplateOutlet]="counterTmpl"></ng-container>
             .
@@ -104,20 +121,20 @@
     </ng-template>
     <app-tabs [linkTemplate]="linkTemplate" [navs]="navs"></app-tabs>
 
-    <br/>
-    <br/>
-    <hr/>
+    <br />
+    <br />
+    <hr />
     <app-hello></app-hello>
     <button (click)="currentProgress = currentProgress + 1">increase</button>
     <app-progress-bar></app-progress-bar>
-    <br/>
+    <br />
     <app-progress-bar
         [backgroundColor]="'#9e9e9e'"
         [progressColor]="'#2e8b57'"
         [progress]="currentProgress"
     >
     </app-progress-bar>
-    <br/>
+    <br />
     <app-author-list></app-author-list>
     <button (click)="showLast = !showLast">show last</button>
     <!-- <app-toggle #toggleComp [(checked)]="isChecked"></app-toggle> -->
@@ -125,11 +142,11 @@
     <ng-container *ngIf="showLast">
         <app-toggle [(checked)]="isChecked"></app-toggle>
     </ng-container>
-    <br/>
+    <br />
     <!-- <button #toggleButton (click)="toggleComp.toggle()">toggle</button> -->
-    <input #nameInput type="text"/>
-    <br/>
-    <br/>
+    <input #nameInput type="text" />
+    <br />
+    <br />
     <app-toggle [(checked)]="questions.question1">
         <h3 class="header">Header 1</h3>
         <label for="">Question 1</label>
@@ -141,5 +158,5 @@
         <p>content 2</p>
         <button>skip</button>
     </app-toggle>
-    <br/>
+    <br />
 </div>

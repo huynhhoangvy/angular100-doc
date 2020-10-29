@@ -7,7 +7,7 @@ describe('ToggleComponent', () => {
     let fixture: ComponentFixture<ToggleComponent>;
 
     beforeEach(async(() => {
-        TestBed.configureTestingModule({ declarations: [ ToggleComponent ] }).compileComponents();
+        TestBed.configureTestingModule({ declarations: [ToggleComponent] }).compileComponents();
     }));
 
     beforeEach(() => {

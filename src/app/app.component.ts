@@ -5,7 +5,7 @@ import { interval } from 'rxjs';
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
-    styleUrls: [ './app.component.scss' ],
+    styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit, AfterViewInit {
     title = 'angular100-doc';
@@ -17,7 +17,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         question2: false,
     };
     counter = 1;
-    navs = [ 'Active', 'Link 1', 'Link 2' ];
+    navs = ['Active', 'Link 1', 'Link 2'];
     currentIndex = 0;
     showTab4 = true;
     currentDate = new Date();
@@ -57,7 +57,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
     addUser() {
         // this.user.push({name: 'new user', age: 31});
-        this.user = [ ...this.user, { name: 'immutable', age: 19 } ];
+        this.user = [...this.user, { name: 'immutable', age: 19 }];
     }
 
     ngOnInit() {
