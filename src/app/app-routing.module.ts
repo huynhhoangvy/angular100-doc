@@ -1,9 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { ArticleDetailsComponent } from 'src/app/article-details/article-details.component';
-import { ArticleListComponent } from 'src/app/article-list/article-list.component';
 import { HomeComponent } from 'src/app/home/home.component';
-import { ChildHomeComponent } from 'src/app/home/child-home/child-home.component';
 
 const routes: Routes = [
     // {
@@ -11,18 +8,21 @@ const routes: Routes = [
     //     component: ChildHomeComponent,
     // },
     {
-        path: 'home',
-        component: HomeComponent,
-        children: [{ path: 'child', component: ChildHomeComponent }],
-    },
-    {
-        path: 'details/:slug',
-        component: ArticleDetailsComponent,
-    },
-    {
         path: '',
-        component: ArticleListComponent,
+        component: HomeComponent,
+        // children: [{ path: 'child', component: ChildHomeComponent }],
     },
+    {
+        path: 'articles', loadChildren: () => import('./article/article.module').then(m => m.ArticleModule),
+    },
+    // {
+    //     path: 'details/:slug',
+    //     component: ArticleDetailsComponent,
+    // },
+    // {
+    //     path: '',
+    //     component: ArticleListComponent,
+    // },
 ];
 
 @NgModule({

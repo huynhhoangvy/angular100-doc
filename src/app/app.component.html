@@ -1,5 +1,6 @@
 <div class="container">
     <h3>Day 27: Angular Router</h3>
+    <router-outlet></router-outlet>
     <ul class="nav nav-pills card-header-pills">
         <li class="nav-item">
             <a class="nav-link" routerLink="/">Index</a>
@@ -8,13 +9,15 @@
             <a class="nav-link" routerLink="/home">Home</a>
         </li>
         <li class="nav-item">
+            <a class="nav-link" routerLink="/articles">Articles</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" routerLink="/home/child">Home child</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" routerLink="/details">Details</a>
         </li>
     </ul>
-    <router-outlet></router-outlet>
     <h3>End Day 27</h3>
     <hr />
     app component

@@ -1,0 +1,11 @@
+<p>article-list works!</p>
+<ul>
+    <li *ngFor="let article of article$ | async" style="border: 1px solid black; padding: 20px; margin-bottom: 20px">
+        {{article.title}}
+        <br>
+        <!--        <a [routerLink]="['/details/', article.slug]">Read more</a>-->
+        <a (click)="onReadMoreClick(article.slug)" style="cursor: pointer; text-decoration: underline">Click to read
+            more</a>
+    </li>
+</ul>
+<router-outlet></router-outlet>

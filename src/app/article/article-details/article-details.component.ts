@@ -21,7 +21,7 @@ export class ArticleDetailsComponent implements OnInit {
         this.article$ = this.activatedRoute.params.pipe(
             pluck('slug'),
             switchMap(slug => this.articleService.getArticle(slug)),
-            filter(article => !! article)
+            filter(article => !!article),
         );
         this.activatedRoute.params.subscribe(console.log);
         this.activatedRoute.paramMap.subscribe(console.log);
