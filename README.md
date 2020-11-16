@@ -1509,7 +1509,7 @@ Creator operators can be called as normal function. `Pipeable` operators will be
     fromEvent(document, 'click').pipe(sampleTime(1000)).subscribe(console.log); // output: click -> wait 1s -> MouseEvent {}
     ``` 
 ####4 Time Operators:
-    
+ 
 ![Difference](src/assets/image/rxjs-debounce-audit-sample-throttle.png)
 [Reference: Dev.to](https://dev.to/kosich/debounce-vs-throttle-vs-audit-vs-sample-difference-you-should-know-1f21)
 
