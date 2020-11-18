@@ -18,9 +18,10 @@ const routes: Routes = [
         loadChildren: () => import('./article/article.module').then(m => m.ArticleModule),
         data: {
             feature: 'articles',
-            permissions: 'article-read'
+            permissions: 'article-read',
         },
-        canActivate: [ArticlesGuard]
+        // canActivate: [ArticlesGuard],
+        canLoad: [ArticlesGuard],
     },
     // {
     //     path: 'details/:slug',
@@ -33,7 +34,12 @@ const routes: Routes = [
 ];
 
 @NgModule({
-    imports: [RouterModule.forRoot(routes, { enableTracing: true })],
+    imports: [
+        RouterModule.forRoot(
+            routes,
+            // { enableTracing: true }
+        ),
+    ],
     exports: [RouterModule],
 })
 export class AppRoutingModule {

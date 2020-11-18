@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { ArticleListComponent } from 'src/app/article/article-list/article-list.component';
 import { ArticleDetailsComponent } from 'src/app/article/article-details/article-details.component';
 import { ArticlesGuard } from 'src/app/guards/articles.guard';
+import { ArticleDetailsEditComponent } from 'src/app/article/article-details-edit/article-details-edit.component';
 
 export const articleRoutes: Routes = [
     {
@@ -16,12 +17,13 @@ export const articleRoutes: Routes = [
         canActivateChild: [ArticlesGuard],
         children: [
             {
-                path: '', component: ArticleDetailsComponent
+                path: '', component: ArticleDetailsComponent,
             },
             {
                 path: 'edit',
-                // component: ArticleDetailsEditComponent
-            }
+                component: ArticleDetailsEditComponent,
+                canDeactivate: [ArticlesGuard],
+            },
         ],
         // component: ArticleDetailsComponent,
         //     },

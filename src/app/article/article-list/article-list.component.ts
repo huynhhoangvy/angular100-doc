@@ -24,4 +24,7 @@ export class ArticleListComponent implements OnInit {
         this.router.navigate(['/articles', slug]);
     }
 
+    onEditClick(slug: string) {
+        this.router.navigate(['/articles', slug, 'edit']);
+    }
 }

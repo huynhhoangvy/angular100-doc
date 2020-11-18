@@ -4,8 +4,8 @@
         {{article.title}}
         <br>
         <!--        <a [routerLink]="['/details/', article.slug]">Read more</a>-->
-        <a (click)="onReadMoreClick(article.slug)" style="cursor: pointer; text-decoration: underline">Click to read
-            more</a>
+        <a (click)="onReadMoreClick(article.slug)" style="cursor: pointer; text-decoration: underline">Click to read more</a>
+        <a (click)="onEditClick(article.slug)" style="cursor: pointer; text-decoration: underline; margin-left: 1rem">Edit</a>
     </li>
 </ul>
 <router-outlet></router-outlet>
